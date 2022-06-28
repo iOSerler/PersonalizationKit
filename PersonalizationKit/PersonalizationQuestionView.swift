@@ -61,7 +61,6 @@ public struct PersonalizationQuestionView: View {
             } else if question.type == "singleChoice" {
                 RadioButtonList(question: question, storage: storage, assets: assets)
             }
-            Spacer()
             
             if questions.count - 1 > question.id {
                 

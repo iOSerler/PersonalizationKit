@@ -14,7 +14,6 @@
 		B7586195286B601C006FFA64 /* ViewAssets.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7586194286B601C006FFA64 /* ViewAssets.swift */; };
 		B7586197286B6094006FFA64 /* QuestionData.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7586196286B6094006FFA64 /* QuestionData.swift */; };
 		B7586199286B60A8006FFA64 /* OptionData.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7586198286B60A8006FFA64 /* OptionData.swift */; };
-		B7AD8496286B9217003AA49D /* PersonalizationRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7AD8495286B9217003AA49D /* PersonalizationRouter.swift */; };
 		B7AD8498286B934A003AA49D /* PersonalizationStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7AD8497286B934A003AA49D /* PersonalizationStorage.swift */; };
 /* End PBXBuildFile section */
 
@@ -39,7 +38,6 @@
 		B7586194286B601C006FFA64 /* ViewAssets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewAssets.swift; sourceTree = "<group>"; };
 		B7586196286B6094006FFA64 /* QuestionData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionData.swift; sourceTree = "<group>"; };
 		B7586198286B60A8006FFA64 /* OptionData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionData.swift; sourceTree = "<group>"; };
-		B7AD8495286B9217003AA49D /* PersonalizationRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonalizationRouter.swift; sourceTree = "<group>"; };
 		B7AD8497286B934A003AA49D /* PersonalizationStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonalizationStorage.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -78,7 +76,6 @@
 				B7586190286B5F9C006FFA64 /* RadioButtonList.swift */,
 				B7586192286B5FD1006FFA64 /* CustomProgressBar.swift */,
 				B7586194286B601C006FFA64 /* ViewAssets.swift */,
-				B7AD8495286B9217003AA49D /* PersonalizationRouter.swift */,
 				B7586196286B6094006FFA64 /* QuestionData.swift */,
 				B7586198286B60A8006FFA64 /* OptionData.swift */,
 				B7AD8497286B934A003AA49D /* PersonalizationStorage.swift */,
@@ -146,7 +143,6 @@
 			files = (
 				B7AD8498286B934A003AA49D /* PersonalizationStorage.swift in Sources */,
 				B7586195286B601C006FFA64 /* ViewAssets.swift in Sources */,
-				B7AD8496286B9217003AA49D /* PersonalizationRouter.swift in Sources */,
 				B758618F286B5F74006FFA64 /* CheckboxList.swift in Sources */,
 				B7586188286B5E45006FFA64 /* PersonalizationQuestionView.swift in Sources */,
 				B7586197286B6094006FFA64 /* QuestionData.swift in Sources */,

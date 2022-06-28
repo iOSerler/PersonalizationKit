@@ -7,8 +7,18 @@
 
 import Foundation
 
-struct OptionData: Identifiable, Equatable {
-    var id: Int
-    var firstPart: String
-    var secondPart: String
+public struct OptionData: Identifiable, Equatable {
+    public let id: Int
+    public let firstPart: String
+    public let secondPart: String
+    
+    public init(
+        id: Int,
+        firstPart: String,
+        secondPart: String
+    ) {
+        self.id = id
+        self.firstPart = firstPart
+        self.secondPart = secondPart
+    }
 }

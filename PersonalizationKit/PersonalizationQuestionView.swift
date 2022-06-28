@@ -8,20 +8,33 @@
 
 import SwiftUI
 
-struct PersonalizationQuestionView: View {
+public struct PersonalizationQuestionView: View {
     let assets: PersonalizationAssets
     var completePersonalization: (() -> Void)?
     let questions: [QuestionData]
     let storage: PersonalizationStorage
     let question: QuestionData
-    @Binding var progress: Int
     
-    var body: some View {
+    public init(
+        assets: PersonalizationAssets,
+        completePersonalization: (() -> Void)?,
+        questions: [QuestionData],
+        storage: PersonalizationStorage,
+        question: QuestionData
+    ) {
+        self.assets = assets
+        self.completePersonalization = completePersonalization
+        self.questions = questions
+        self.storage = storage
+        self.question = question
+    }
+    
+    public var body: some View {
         
         VStack(alignment: .center, spacing: UIScreen.main.bounds.width/15) {
             CustomProgressBarView(assets: assets,
                                   numQuestions: questions.count,
-                                  progress: $progress)
+                                  progress: question.id)
             
             if !question.image.isEmpty {
                 Image(question.image)
@@ -55,10 +68,10 @@ struct PersonalizationQuestionView: View {
                 NavigationLink(destination:
                                 PersonalizationQuestionView(
                                     assets: assets,
+                                    completePersonalization: completePersonalization,
                                     questions: questions,
                                     storage: storage,
-                                    question: questions[question.id],
-                                    progress: $progress
+                                    question: questions[question.id]
                                 )
                 ) {
                     ButtonText(title: "Continue", assets: assets)
@@ -79,9 +92,6 @@ struct PersonalizationQuestionView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarHidden(false).transition(.opacity)
-        .onAppear {
-            self.progress = question.id
-        }
     }
 }
 

@@ -8,7 +8,7 @@
 import Foundation
 
 
-protocol PersonalizationStorage {
+public protocol PersonalizationStorage {
     
     func addCheckedOption(_ question: QuestionData, option: OptionData)
     

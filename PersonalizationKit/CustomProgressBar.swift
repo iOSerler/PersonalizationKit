@@ -10,7 +10,7 @@ import SwiftUI
 struct CustomProgressBarView: View {
     var assets: PersonalizationAssets
     var numQuestions: Int
-    @Binding var progress: Int
+    var progress: Int
     var body: some View {
         HStack {
             Spacer()

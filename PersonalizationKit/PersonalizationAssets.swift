@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-protocol PersonalizationAssets {
+public protocol PersonalizationAssets {
     var titleFont: String { get }
     var descriptionFont: String { get }
     var mainTextColor: UIColor { get }

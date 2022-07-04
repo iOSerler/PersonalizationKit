@@ -62,16 +62,17 @@ public struct PersonalizationQuestionView: View {
                 RadioButtonList(question: question, storage: storage, assets: assets)
             }
             
-            if questions.count - 1 > question.id {
+            if questions.count > question.id {
                 
-                NavigationLink(destination:
-                                PersonalizationQuestionView(
-                                    assets: assets,
-                                    completePersonalization: completePersonalization,
-                                    questions: questions,
-                                    storage: storage,
-                                    question: questions[question.id]
-                                )
+                NavigationLink(
+                    destination:
+                        PersonalizationQuestionView(
+                            assets: assets,
+                            completePersonalization: completePersonalization,
+                            questions: questions,
+                            storage: storage,
+                            question: questions[question.id]
+                        )
                 ) {
                     ButtonText(title: "Continue", assets: assets)
                 }

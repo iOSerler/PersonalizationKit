@@ -48,9 +48,9 @@ struct CheckboxRow: View {
     var body: some View {
         HStack {
             self.checked ? Image(assets.checkboxFull) : Image(assets.checkboxEmpty)
-            Text(optionData.firstPart)
+            Text(optionData.emoji)
                 .padding(.leading, 10)
-            Text(optionData.secondPart)
+            Text(optionData.text)
             Spacer()
         }.contentShape(Rectangle())
             .onTapGesture(perform: {

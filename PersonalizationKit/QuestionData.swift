@@ -7,28 +7,22 @@
 
 import Foundation
 
-public struct QuestionData {
+public struct QuestionData: Decodable {
     public var id: Int
     public var type: String
     public var image: String
-    public var title: String
-    public var description: String
+    public var titleEn: String
+    public var titleRu: String
+    public var descriptionEn: String
+    public var descriptionRu: String
     public var optionsData: [OptionData]
     
-    public init(
-        id: Int,
-        type: String,
-        image: String,
-        title: String,
-        description: String,
-        optionsData: [OptionData]
-    ) {
-        self.id = id
-        self.type = type
-        self.image = image
-        self.title = title
-        self.description = description
-        self.optionsData = optionsData
+    public var title: String {
+        titleEn
+    }
+    
+    public var description: String {
+        descriptionEn
     }
     
 }

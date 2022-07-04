@@ -7,18 +7,13 @@
 
 import Foundation
 
-public struct OptionData: Identifiable, Equatable {
+public struct OptionData: Identifiable, Equatable, Decodable {
     public let id: Int
-    public let firstPart: String
-    public let secondPart: String
-    
-    public init(
-        id: Int,
-        firstPart: String,
-        secondPart: String
-    ) {
-        self.id = id
-        self.firstPart = firstPart
-        self.secondPart = secondPart
+    public let emoji: String
+    public let textRu: String
+    public let textEn: String
+
+    public var text: String {
+        textEn
     }
 }

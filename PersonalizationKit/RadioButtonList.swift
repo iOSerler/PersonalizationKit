@@ -48,12 +48,15 @@ struct RadioButtonRow: View {
                 tapAction()
             }, label: {
                 HStack {
-                    Text(optionData.firstPart)
+                    Text(optionData.emoji)
                         .font(.custom(assets.titleFont, size: 16))
                         .foregroundColor(chosen ? Color(assets.primaryColor) : .black)
                         .padding(.leading, 20)
+                    Text(optionData.text)
+                        .font(.custom(assets.titleFont, size: 16))
+                        .foregroundColor(chosen ? Color(assets.primaryColor) : .black)
                     Spacer()
-                    Text(optionData.secondPart)
+                    Text("")
                         .font(.custom(assets.descriptionFont, size: 14))
                         .foregroundColor(
                             chosen ?

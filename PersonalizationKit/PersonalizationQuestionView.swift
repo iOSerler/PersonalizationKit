@@ -14,20 +14,22 @@ public struct PersonalizationQuestionView: View {
     var completePersonalization: (() -> Void)?
     let questions: [QuestionData]
     let storage: PersonalizationStorage
-    let question: QuestionData
     
+    @State private var question: QuestionData
+    @State private var offsetX: CGFloat = 0
+    @State private var buttonIsEnabled = true
+
     public init(
         assets: PersonalizationAssets,
         completePersonalization: (() -> Void)?,
         questions: [QuestionData],
-        storage: PersonalizationStorage,
-        question: QuestionData
+        storage: PersonalizationStorage
     ) {
         self.assets = assets
         self.completePersonalization = completePersonalization
         self.questions = questions
         self.storage = storage
-        self.question = question
+        self._question = State(wrappedValue: questions[0])
     }
     
     public var body: some View {
@@ -37,31 +39,34 @@ public struct PersonalizationQuestionView: View {
                                   numQuestions: questions.count,
                                   progress: question.id)
             
-            
-            if !question.image.isEmpty {
-                Image(question.image)
-                    .padding(.top, 10)
-            } else {
-                Spacer()
-            }
-            
-            Text(question.title)
-                .font(Font.custom(assets.titleFont, size: 21))
-                .foregroundColor(Color(assets.primaryTextColor))
-                .multilineTextAlignment(.center)
-                .padding(.all, 16)
-            
-            Text(question.description)
-                .font(Font.custom(assets.descriptionFont, size: 15))
-                .foregroundColor(Color(assets.secondaryTextColor))
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-            
-            if question.type == "checkbox" {
-                CheckboxList( question: question, storage: storage, assets: assets)
-            } else if question.type == "singleChoice" {
-                RadioButtonList(question: question, storage: storage, assets: assets)
-            }
+            VStack(alignment: .center) {
+                
+                if !question.image.isEmpty {
+                    Image(question.image)
+                        .padding(.top, 10)
+                } else {
+                    Spacer()
+                }
+                
+                Text(question.title)
+                    .font(Font.custom(assets.titleFont, size: 21))
+                    .foregroundColor(Color(assets.primaryTextColor))
+                    .multilineTextAlignment(.center)
+                    .padding(.all, 16)
+                
+                Text(question.description)
+                    .font(Font.custom(assets.descriptionFont, size: 15))
+                    .foregroundColor(Color(assets.secondaryTextColor))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+                
+                if question.type == "checkbox" {
+                    CheckboxList( question: question, storage: storage, assets: assets)
+                } else if question.type == "singleChoice" {
+                    RadioButtonList(question: question, storage: storage, assets: assets)
+                        
+                }
+            }.offset(x: offsetX, y: 0)
             
             if !question.image.isEmpty {
                 Spacer()
@@ -69,16 +74,25 @@ public struct PersonalizationQuestionView: View {
             
             if questions.count > question.id {
                 
-                NavigationLink(
-                    destination:
-                        PersonalizationQuestionView(
-                            assets: assets,
-                            completePersonalization: completePersonalization,
-                            questions: questions,
-                            storage: storage,
-                            question: questions[question.id]
-                        )
-                ) {
+                Button {
+                    
+                    guard buttonIsEnabled else {return}
+                    
+                    buttonIsEnabled = false
+                    let duration = 0.5
+                    withAnimation(.easeInOut(duration: duration)) {
+                        offsetX = -UIScreen.main.bounds.width
+                    }
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now()+duration, execute: {
+                        self.offsetX = UIScreen.main.bounds.width
+                        self.question = self.questions[question.id]
+                        buttonIsEnabled = true
+                        withAnimation(.easeInOut(duration: duration)) {
+                            offsetX = 0
+                        }
+                    })
+                } label: {
                     ButtonText(title: "Continue".localized(), assets: assets)
                 }
                 
@@ -94,9 +108,7 @@ public struct PersonalizationQuestionView: View {
                 })
             }
             
-        }
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationBarHidden(false).transition(.opacity)
+        }.interactiveDismissDisabled()
     }
 }
 

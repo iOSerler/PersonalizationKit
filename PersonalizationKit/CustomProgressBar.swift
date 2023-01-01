@@ -22,7 +22,7 @@ struct CustomProgressBarView: View {
                         Circle()
                             .scale(x: 1, y: 1)
                             .foregroundColor(ind > self.progress ?
-                                             Color(assets.primaryColor.withAlphaComponent(0.3)) :
+                                             Color(assets.secondaryColor) :
                                                 Color(assets.primaryColor))
                         Text(String(ind))
                             .font(Font.custom(assets.descriptionFont, size: 12))
@@ -41,7 +41,7 @@ struct CustomProgressBarView: View {
                 Circle()
                     .scale(x: 1, y: 1)
                     .foregroundColor(numQuestions > self.progress ?
-                                     Color(assets.primaryColor.withAlphaComponent(0.3)) :
+                                     Color(assets.secondaryColor) :
                                         Color(assets.primaryColor))
                 if numQuestions <= self.progress {
                     Image(systemName: "checkmark")

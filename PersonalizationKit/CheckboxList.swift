@@ -53,6 +53,7 @@ struct CheckboxRow: View {
             Text(optionData.emoji)
                 .padding(.leading, 10)
             Text(optionData.text)
+                .multilineTextAlignment(.leading)
             Spacer()
         }.contentShape(Rectangle())
             .onTapGesture(perform: {

@@ -56,14 +56,7 @@ struct RadioButtonRow: View {
                     Text(optionData.text)
                         .font(.custom(assets.titleFont, size: 16))
                         .foregroundColor(chosen ? Color(assets.primaryTextColor) : .black)
-                    Spacer()
-                    Text("")
-                        .font(.custom(assets.descriptionFont, size: 14))
-                        .foregroundColor(
-                            chosen ?
-                            Color(assets.primaryTextColor) : Color(assets.secondaryTextColor)
-                        )
-                        .padding(.trailing, 20)
+                        .multilineTextAlignment(.leading)
                 }
                 .frame(width: UIScreen.main.bounds.width - 60, height: 66, alignment: .leading)
                 .overlay(RoundedRectangle(cornerRadius: 12)

@@ -8,6 +8,7 @@
 
 import SwiftUI
 
+@available(iOS 15, *)
 public struct PersonalizationQuestionView: View {
     let assets: PersonalizationAssets
     var completePersonalization: (() -> Void)?
@@ -38,18 +39,17 @@ public struct PersonalizationQuestionView: View {
             
             if !question.image.isEmpty {
                 Image(question.image)
-                    .padding(.top, UIScreen.main.bounds.height / 10)
+                    .padding(.top, 10)
             }
             
             Text(question.title)
-                .font(Font.custom(assets.titleFont, size: 20))
+                .font(Font.custom(assets.titleFont, size: 21))
                 .foregroundColor(Color(assets.mainTextColor))
                 .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(idealHeight: .infinity)
+                .padding(.horizontal)
             
             Text(question.description)
-                .font(Font.custom(assets.descriptionFont, size: 14))
+                .font(Font.custom(assets.descriptionFont, size: 15))
                 .foregroundColor(Color(assets.descriptionTextColor))
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
@@ -61,6 +61,8 @@ public struct PersonalizationQuestionView: View {
             } else if question.type == "singleChoice" {
                 RadioButtonList(question: question, storage: storage, assets: assets)
             }
+            
+            Spacer()
             
             if questions.count > question.id {
                 
@@ -95,7 +97,7 @@ public struct PersonalizationQuestionView: View {
     }
 }
 
-
+@available(iOS 15, *)
 struct ButtonText: View {
     
     let title: String

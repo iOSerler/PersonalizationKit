@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+@available(iOS 15, *)
 struct CheckboxList: View {
     
     let question: QuestionData
@@ -37,6 +38,7 @@ struct CheckboxList: View {
     }
 }
 
+@available(iOS 15, *)
 struct CheckboxRow: View {
     
     let optionData: OptionData
@@ -47,7 +49,7 @@ struct CheckboxRow: View {
     
     var body: some View {
         HStack {
-            self.checked ? Image(assets.checkboxFull) : Image(assets.checkboxEmpty)
+            self.checked ? Image(systemName: "checkmark.circle.fill").foregroundColor(Color(uiColor:assets.primaryLightColor)) : Image(systemName: "circle").foregroundColor(Color(uiColor:assets.primaryLightColor))
             Text(optionData.emoji)
                 .padding(.leading, 10)
             Text(optionData.text)

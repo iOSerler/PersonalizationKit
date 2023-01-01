@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+@available(iOS 15, *)
 struct CustomProgressBarView: View {
     var assets: PersonalizationAssets
     var numQuestions: Int

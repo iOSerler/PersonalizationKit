@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+@available(iOS 15, *)
 struct RadioButtonList: View {
     
     let question: QuestionData
@@ -36,6 +37,7 @@ struct RadioButtonList: View {
     }
 }
 
+@available(iOS 15, *)
 struct RadioButtonRow: View {
     var assets: PersonalizationAssets
     let optionData: OptionData

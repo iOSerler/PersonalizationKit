@@ -15,7 +15,10 @@ public struct PersonalizationQuestionView: View {
     let questions: [QuestionData]
     let storage: PersonalizationStorage
     
-    @State private var question: QuestionData
+    var question: QuestionData {
+        questions[questionIndex]
+    }
+    
     @State private var questionIndex = 0
     @State private var offsetX: CGFloat = 0
     @State private var isAnimationInProgress = false
@@ -30,7 +33,6 @@ public struct PersonalizationQuestionView: View {
         self.completePersonalization = completePersonalization
         self.questions = questions
         self.storage = storage
-        self._question = State(wrappedValue: questions[0])
     }
     
     public var body: some View {
@@ -65,7 +67,7 @@ public struct PersonalizationQuestionView: View {
                     CheckboxList(question: question, storage: storage, assets: assets)
                 } else if question.type == "singleChoice" {
                     RadioButtonList(question: question, storage: storage, assets: assets)
-                        
+                    
                 }
             }.offset(x: offsetX, y: 0)
             
@@ -91,9 +93,7 @@ public struct PersonalizationQuestionView: View {
                     DispatchQueue.main.asyncAfter(deadline: .now()+duration, execute: {
                         self.offsetX = UIScreen.main.bounds.width
                         self.questionIndex += 1
-                        self.question = self.questions[questionIndex]
-                        
-                        
+
                         withAnimation(.easeInOut(duration: duration)) {
                             offsetX = 0
                             isAnimationInProgress = false

@@ -14,6 +14,6 @@ public struct OptionData: Identifiable, Equatable, Decodable {
     public let textEn: String
 
     public var text: String {
-        textEn
+        isRussian ? textRu : textEn
     }
 }

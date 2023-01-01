@@ -32,28 +32,29 @@ public struct PersonalizationQuestionView: View {
     
     public var body: some View {
         
-        VStack(alignment: .center, spacing: UIScreen.main.bounds.width/15) {
+        VStack(alignment: .center) {
             CustomProgressBarView(assets: assets,
                                   numQuestions: questions.count,
                                   progress: question.id)
             
+            
             if !question.image.isEmpty {
                 Image(question.image)
                     .padding(.top, 10)
+            } else {
+                Spacer()
             }
             
             Text(question.title)
                 .font(Font.custom(assets.titleFont, size: 21))
                 .foregroundColor(Color(assets.mainTextColor))
                 .multilineTextAlignment(.center)
-                .padding(.horizontal)
+                .padding(.all, 16)
             
             Text(question.description)
                 .font(Font.custom(assets.descriptionFont, size: 15))
                 .foregroundColor(Color(assets.descriptionTextColor))
                 .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(idealHeight: .infinity)
                 .padding(.horizontal)
             
             if question.type == "checkbox" {
@@ -62,7 +63,9 @@ public struct PersonalizationQuestionView: View {
                 RadioButtonList(question: question, storage: storage, assets: assets)
             }
             
-            Spacer()
+            if !question.image.isEmpty {
+                Spacer()
+            }
             
             if questions.count > question.id {
                 
@@ -76,7 +79,7 @@ public struct PersonalizationQuestionView: View {
                             question: questions[question.id]
                         )
                 ) {
-                    ButtonText(title: "Continue", assets: assets)
+                    ButtonText(title: "Continue".localized(), assets: assets)
                 }
                 
             } else {
@@ -87,7 +90,7 @@ public struct PersonalizationQuestionView: View {
                         }
                     }
                 }, label: {
-                    ButtonText(title: "Done", assets: assets)
+                    ButtonText(title: "Done".localized(), assets: assets)
                 })
             }
             

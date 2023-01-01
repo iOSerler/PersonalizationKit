@@ -18,11 +18,11 @@ public struct QuestionData: Decodable {
     public var optionsData: [OptionData]
     
     public var title: String {
-        titleEn
+        isRussian ? titleRu : titleEn
     }
     
     public var description: String {
-        descriptionEn
+        isRussian ? descriptionRu : descriptionEn
     }
     
 }

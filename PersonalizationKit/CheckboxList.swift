@@ -49,7 +49,7 @@ struct CheckboxRow: View {
     
     var body: some View {
         HStack {
-            self.checked ? Image(systemName: "checkmark.circle.fill").foregroundColor(Color(uiColor:assets.primaryLightColor)) : Image(systemName: "circle").foregroundColor(Color(uiColor:assets.primaryLightColor))
+            Image(systemName: self.checked ? "checkmark.circle.fill" : "circle").foregroundColor(Color(uiColor:assets.primaryColor.withAlphaComponent(0.5)))
             Text(optionData.emoji)
                 .padding(.leading, 10)
             Text(optionData.text)

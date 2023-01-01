@@ -47,13 +47,13 @@ public struct PersonalizationQuestionView: View {
             
             Text(question.title)
                 .font(Font.custom(assets.titleFont, size: 21))
-                .foregroundColor(Color(assets.mainTextColor))
+                .foregroundColor(Color(assets.primaryTextColor))
                 .multilineTextAlignment(.center)
                 .padding(.all, 16)
             
             Text(question.description)
                 .font(Font.custom(assets.descriptionFont, size: 15))
-                .foregroundColor(Color(assets.descriptionTextColor))
+                .foregroundColor(Color(assets.secondaryTextColor))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
             

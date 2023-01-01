@@ -55,20 +55,20 @@ struct RadioButtonRow: View {
                         .padding(.leading, 20)
                     Text(optionData.text)
                         .font(.custom(assets.titleFont, size: 16))
-                        .foregroundColor(chosen ? Color(assets.mainTextColor) : .black)
+                        .foregroundColor(chosen ? Color(assets.primaryTextColor) : .black)
                     Spacer()
                     Text("")
                         .font(.custom(assets.descriptionFont, size: 14))
                         .foregroundColor(
                             chosen ?
-                            Color(assets.mainTextColor) : Color(assets.descriptionTextColor)
+                            Color(assets.primaryTextColor) : Color(assets.secondaryTextColor)
                         )
                         .padding(.trailing, 20)
                 }
                 .frame(width: UIScreen.main.bounds.width - 60, height: 66, alignment: .leading)
                 .overlay(RoundedRectangle(cornerRadius: 12)
-                    .stroke(chosen ? Color(assets.primaryColor) : Color(assets.borderColor), lineWidth: 2))
-                .background(chosen ? Color(assets.primaryLighterColor) : .white)
+                .stroke(Color(assets.borderColor), lineWidth: 2))
+                .background(chosen ? Color(assets.primaryColor.withAlphaComponent(0.3)) : .white)
             }
         )
         .cornerRadius(12)

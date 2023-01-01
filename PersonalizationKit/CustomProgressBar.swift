@@ -22,12 +22,12 @@ struct CustomProgressBarView: View {
                         Circle()
                             .scale(x: 1, y: 1)
                             .foregroundColor(ind > self.progress ?
-                                             Color(assets.primaryLighterColor) :
+                                             Color(assets.primaryColor.withAlphaComponent(0.3)) :
                                                 Color(assets.primaryColor))
                         Text(String(ind))
                             .font(Font.custom(assets.descriptionFont, size: 12))
                             .foregroundColor(ind > self.progress ?
-                                             Color(assets.primaryLightColor) :
+                                             Color.clear :
                                                 Color(assets.buttonTextColor))
                     }.frame(height: 20, alignment: .center)
                     
@@ -41,13 +41,13 @@ struct CustomProgressBarView: View {
                 Circle()
                     .scale(x: 1, y: 1)
                     .foregroundColor(numQuestions > self.progress ?
-                                     Color(assets.primaryLighterColor) :
+                                     Color(assets.primaryColor.withAlphaComponent(0.3)) :
                                         Color(assets.primaryColor))
-                Image(systemName: "checkmark")
-                    .font(Font.custom(assets.descriptionFont, size: 12))
-                    .foregroundColor(numQuestions > self.progress ?
-                                     Color(assets.primaryLightColor) :
-                                        Color(assets.buttonTextColor))
+                if numQuestions <= self.progress {
+                    Image(systemName: "checkmark")
+                        .font(Font.custom(assets.descriptionFont, size: 12))
+                        .foregroundColor(Color(assets.buttonTextColor))
+                }
             }.frame(height: 20, alignment: .center)
             
             

@@ -16,8 +16,9 @@ public struct PersonalizationQuestionView: View {
     let storage: PersonalizationStorage
     
     @State private var question: QuestionData
+    @State private var questionIndex = 0
     @State private var offsetX: CGFloat = 0
-    @State private var buttonIsEnabled = true
+    @State private var isAnimationInProgress = false
 
     public init(
         assets: PersonalizationAssets,
@@ -37,7 +38,7 @@ public struct PersonalizationQuestionView: View {
         VStack(alignment: .center) {
             CustomProgressBarView(assets: assets,
                                   numQuestions: questions.count,
-                                  progress: question.id)
+                                  progress: questionIndex+1)
             
             VStack(alignment: .center) {
                 
@@ -61,7 +62,7 @@ public struct PersonalizationQuestionView: View {
                     .padding(.horizontal)
                 
                 if question.type == "checkbox" {
-                    CheckboxList( question: question, storage: storage, assets: assets)
+                    CheckboxList(question: question, storage: storage, assets: assets)
                 } else if question.type == "singleChoice" {
                     RadioButtonList(question: question, storage: storage, assets: assets)
                         
@@ -72,13 +73,16 @@ public struct PersonalizationQuestionView: View {
                 Spacer()
             }
             
-            if questions.count > question.id {
+            if questions.count > questionIndex+1 {
                 
                 Button {
                     
-                    guard buttonIsEnabled else {return}
+                    if isAnimationInProgress {return}
+                                        
+                    guard ensureAnOptionWasPicked() else {return}
                     
-                    buttonIsEnabled = false
+                    isAnimationInProgress = true
+                    
                     let duration = 0.5
                     withAnimation(.easeInOut(duration: duration)) {
                         offsetX = -UIScreen.main.bounds.width
@@ -86,10 +90,13 @@ public struct PersonalizationQuestionView: View {
                     
                     DispatchQueue.main.asyncAfter(deadline: .now()+duration, execute: {
                         self.offsetX = UIScreen.main.bounds.width
-                        self.question = self.questions[question.id]
-                        buttonIsEnabled = true
+                        self.questionIndex += 1
+                        self.question = self.questions[questionIndex]
+                        
+                        
                         withAnimation(.easeInOut(duration: duration)) {
                             offsetX = 0
+                            isAnimationInProgress = false
                         }
                     })
                 } label: {
@@ -109,6 +116,24 @@ public struct PersonalizationQuestionView: View {
             }
             
         }.interactiveDismissDisabled()
+    }
+    
+    func ensureAnOptionWasPicked() -> Bool {
+        
+        var didPickAnOption = false
+        
+        if question.type == "checkbox" {
+            question.optionsData.forEach { optionData in
+                if storage.isOptionChecked(question, option: optionData) {
+                    didPickAnOption = true
+                }
+            }
+        } else if question.type == "singleChoice" && storage.getChosenOption(question) != "" {
+            didPickAnOption = true
+        }
+        
+        
+        return didPickAnOption
     }
 }
 

@@ -8,7 +8,7 @@
 import Foundation
 
 public struct QuestionData: Decodable {
-    public var id: Int
+    public var id: String
     public var type: String
     public var image: String
     public var titleEn: String

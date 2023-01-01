@@ -16,7 +16,7 @@ public protocol PersonalizationStorage {
     
     func isOptionChecked(_ question: QuestionData, option: OptionData) -> Bool
     
-    func getChosenOption(_ question: QuestionData) -> Int
+    func getChosenOption(_ question: QuestionData) -> String
     
     func setChosenOption(_ question: QuestionData, option: OptionData)
     

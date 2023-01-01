@@ -14,7 +14,7 @@ struct RadioButtonList: View {
     let storage: PersonalizationStorage
     let assets: PersonalizationAssets
 
-    @State var chosenOptionId = 0
+    @State var chosenOptionId = ""
     
     var body: some View {
         ScrollView {
@@ -55,7 +55,7 @@ struct RadioButtonRow: View {
                         .padding(.leading, 20)
                     Text(optionData.text)
                         .font(.custom(assets.titleFont, size: 16))
-                        .foregroundColor(chosen ? Color(assets.primaryTextColor) : .black)
+                        .foregroundColor(Color(assets.primaryTextColor))
                         .multilineTextAlignment(.leading)
                 }
                 .frame(width: UIScreen.main.bounds.width - 60, height: 66, alignment: .leading)

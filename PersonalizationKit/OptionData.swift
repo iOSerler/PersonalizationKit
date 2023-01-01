@@ -8,7 +8,7 @@
 import Foundation
 
 public struct OptionData: Identifiable, Equatable, Decodable {
-    public let id: Int
+    public let id: String
     public let emoji: String
     public let textRu: String
     public let textEn: String

@@ -130,6 +130,8 @@ public struct PersonalizationQuestionView: View {
             }
         } else if question.type == "singleChoice" && storage.getChosenOption(question) != "" {
             didPickAnOption = true
+        } else if question.type == "image" {
+            didPickAnOption = true
         }
         
         

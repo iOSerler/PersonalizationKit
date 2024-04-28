@@ -11,7 +11,7 @@ import SwiftUI
 struct CheckboxList: View {
     
     let question: QuestionData
-    let storage: PersonalizationStorage
+    let storage: QuestionnaireStorage
     let assets: PersonalizationAssets
     
     var body: some View {

@@ -13,7 +13,7 @@ public struct PersonalizationQuestionView: View {
     let assets: PersonalizationAssets
     var completePersonalization: (() -> Void)?
     let questions: [QuestionData]
-    let storage: PersonalizationStorage
+    let storage: QuestionnaireStorage
     
     var question: QuestionData {
         questions[questionIndex]
@@ -27,7 +27,7 @@ public struct PersonalizationQuestionView: View {
         assets: PersonalizationAssets,
         completePersonalization: (() -> Void)?,
         questions: [QuestionData],
-        storage: PersonalizationStorage
+        storage: QuestionnaireStorage
     ) {
         self.assets = assets
         self.completePersonalization = completePersonalization

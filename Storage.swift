@@ -1,5 +1,5 @@
 //
-//  PersonalizationStorage.swift
+//  QuestionnaireStorage.swift
 //  PersonalizationKit
 //
 //  Created by Daniya on 28/06/2022.
@@ -8,7 +8,7 @@
 import Foundation
 
 
-public protocol PersonalizationStorage {
+public protocol QuestionnaireStorage {
     
     // MARK: -  PERSONALIZATION
     
@@ -26,16 +26,16 @@ public protocol PersonalizationStorage {
 
 
 
-class Storage: NSObject {
+public class LearnerStorage: NSObject {
     
-    static let shared = Storage()
+    public static let shared = LearnerStorage()
     
-    func store(_ anyObject: Any, forKey key: String) {
+    public func store(_ anyObject: Any, forKey key: String) {
         UserDefaults(suiteName: "group.com.nurios.namazapp")?.set(anyObject, forKey: key)
         UserDefaults(suiteName: "group.com.nurios.namazapp")?.synchronize()
     }
     
-    func retrieve(forKey key: String) -> Any? {
+    public func retrieve(forKey key: String) -> Any? {
         if let any = UserDefaults(suiteName: "group.com.nurios.namazapp")?.object(forKey: key) {
             return any
         } else if let any = UserDefaults.standard.object(forKey: key) {
@@ -45,7 +45,7 @@ class Storage: NSObject {
         }
     }
     
-    func remove(forKey key: String) {
+    public func remove(forKey key: String) {
         UserDefaults(suiteName: "group.com.nurios.namazapp")?.removeObject(forKey: key)
         UserDefaults(suiteName: "group.com.nurios.namazapp")?.synchronize()
         
@@ -53,7 +53,7 @@ class Storage: NSObject {
         UserDefaults.standard.synchronize()
     }
     
-    func getAllItemKeys(withPrefix: String) -> [String] {
+    public func getAllItemKeys(withPrefix: String) -> [String] {
         return Array(UserDefaults(suiteName: "group.com.nurios.namazapp")?.dictionaryRepresentation().keys.filter { (key) -> Bool in
                 return key.contains(withPrefix)
         } ?? [])

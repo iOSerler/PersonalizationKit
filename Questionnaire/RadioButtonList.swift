@@ -11,7 +11,7 @@ import SwiftUI
 struct RadioButtonList: View {
     
     let question: QuestionData
-    let storage: PersonalizationStorage
+    let storage: QuestionnaireStorage
     let assets: PersonalizationAssets
 
     @State var lastChosenOptionId = ""

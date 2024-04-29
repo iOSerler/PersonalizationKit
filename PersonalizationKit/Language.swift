@@ -65,6 +65,7 @@ extension String {
         let en = [
             "Continue": "Continue",
             "Done": "Done",
+            "updateLearnerInfo": "Update your learner info",
         ]
         
         return en[self] ?? self
@@ -75,6 +76,7 @@ extension String {
         let ru = [
             "Continue": "Следующий",
             "Done": "Завершить",
+            "updateLearnerInfo": "Обновить информацию по профилю",
         ]
         
         return ru[self] ?? self

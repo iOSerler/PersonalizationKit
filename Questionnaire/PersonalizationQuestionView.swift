@@ -10,10 +10,11 @@ import SwiftUI
 
 @available(iOS 15, *)
 public struct PersonalizationQuestionView: View {
+    let learnerStorage: LearnerStorage
     let assets: PersonalizationAssets
     var completePersonalization: (() -> Void)?
     let questions: [QuestionData]
-    let storage: QuestionnaireStorage
+    let startDate: Date
     
     var question: QuestionData {
         questions[questionIndex]
@@ -24,15 +25,17 @@ public struct PersonalizationQuestionView: View {
     @State private var isAnimationInProgress = false
 
     public init(
+        learnerStorage: LearnerStorage,
         assets: PersonalizationAssets,
         completePersonalization: (() -> Void)?,
         questions: [QuestionData],
-        storage: QuestionnaireStorage
+        startDate: Date
     ) {
+        self.learnerStorage = learnerStorage
         self.assets = assets
         self.completePersonalization = completePersonalization
         self.questions = questions
-        self.storage = storage
+        self.startDate = startDate
     }
     
     public var body: some View {
@@ -64,9 +67,30 @@ public struct PersonalizationQuestionView: View {
                     .padding(.horizontal)
                 
                 if question.type == "checkbox" {
-                    CheckboxList(question: question, storage: storage, assets: assets)
+                    List {
+                        ForEach(question.optionsData) { optionData in
+                            
+                            CheckboxRow(
+                                optionData: optionData,
+                                tapAction: { checked in
+                                    if checked {
+                                        addCheckedOption(question, option: optionData)
+                                    } else {
+                                        removeCheckedOption(question, option: optionData)
+                                    }
+                                },
+                                assets: assets,
+                                checked: isOptionChecked(question, option: optionData)
+                            )
+                            .padding()
+                            .listRowSeparator(.visible, edges: .bottom)
+                            .listRowSeparator(.hidden, edges: .all)
+                        }
+                    }.listStyle(.plain)
+                    
+                    
                 } else if question.type == "singleChoice" {
-                    RadioButtonList(question: question, storage: storage, assets: assets)
+                    RadioButtonList(question: question, assets: assets, lastChosenOptionId: getChosenOption(question), setChosenOption: setChosenOption(_:option:))
                     
                 }
             }.offset(x: offsetX, y: 0)
@@ -107,6 +131,19 @@ public struct PersonalizationQuestionView: View {
                 Button(action: {
                     DispatchQueue.main.async {
                         withAnimation {
+                            for question in questions {
+                                if question.type == "singleChoice" {
+                                    
+                                    let userProperty = question.id
+                                    let propertyValue = getChosenOption(question)
+                                    
+                                    //                            print(userProperty, ":", propertyValue)
+                                    learnerStorage.store(propertyValue, forKey: "personalization_\(userProperty)")
+                                    Analytics.shared.setUserProperty(userProperty, value: propertyValue)
+                                }
+                            }
+                            
+                            Analytics.shared.logActivity("personalization", type: "action", value: 1, startDate: startDate)
                             completePersonalization?()
                         }
                     }
@@ -124,11 +161,11 @@ public struct PersonalizationQuestionView: View {
         
         if question.type == "checkbox" {
             question.optionsData.forEach { optionData in
-                if storage.isOptionChecked(question, option: optionData) {
+                if isOptionChecked(question, option: optionData) {
                     didPickAnOption = true
                 }
             }
-        } else if question.type == "singleChoice" && storage.getChosenOption(question) != "" {
+        } else if question.type == "singleChoice" && getChosenOption(question) != "" {
             didPickAnOption = true
         } else if question.type == "image" {
             didPickAnOption = true
@@ -136,6 +173,53 @@ public struct PersonalizationQuestionView: View {
         
         
         return didPickAnOption
+    }
+    
+    
+    func addCheckedOption(_ question: QuestionData, option: OptionData) {
+        
+        let storageID = "checkBoxQuestionID_\(question.id)"
+        if var checkedOptions = learnerStorage.retrieve(forKey: storageID) as? [String] {
+            checkedOptions.append(option.id)
+            checkedOptions = Array(Set(checkedOptions))
+            learnerStorage.store(checkedOptions, forKey: storageID)
+        } else {
+            learnerStorage.store([option.id], forKey: storageID)
+        }
+        
+                
+    }
+
+    func removeCheckedOption(_ question: QuestionData, option: OptionData) {
+        let storageID = "checkBoxQuestionID_\(question.id)"
+        if var checkedOptions = learnerStorage.retrieve(forKey: storageID) as? [String] {
+            var set = Set(checkedOptions)
+            set.remove(option.id)
+            checkedOptions = Array(set)
+            learnerStorage.store(checkedOptions, forKey: storageID)
+            
+        }
+    }
+    
+    func isOptionChecked(_ question: QuestionData, option: OptionData) -> Bool {
+        let storageID = "checkBoxQuestionID_\(question.id)"
+        if let checkedOptions = learnerStorage.retrieve(forKey: storageID) as? [String] {
+            let set = Set(checkedOptions)
+            return set.contains(option.id)
+        }
+        return false
+    }
+    
+    func getChosenOption(_ question: QuestionData) -> String {
+        let storageID = "checkBoxQuestionID_\(question.id)"
+        let chosenOption = learnerStorage.retrieve(forKey: storageID) as? String
+        return chosenOption ?? ""
+    }
+    
+    func setChosenOption(_ question: QuestionData, option: OptionData) {
+        let storageID = "checkBoxQuestionID_\(question.id)"
+        learnerStorage.store(option.id, forKey: storageID)
+        
     }
 }
 

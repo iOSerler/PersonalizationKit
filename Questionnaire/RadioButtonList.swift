@@ -11,10 +11,10 @@ import SwiftUI
 struct RadioButtonList: View {
     
     let question: QuestionData
-    let storage: QuestionnaireStorage
     let assets: PersonalizationAssets
-
-    @State var lastChosenOptionId = ""
+    
+    @State var lastChosenOptionId: String
+    let setChosenOption: (QuestionData, OptionData) -> Void
     
     var body: some View {
         ScrollView {
@@ -22,7 +22,7 @@ struct RadioButtonList: View {
                 
                 Button(
                     action: {
-                        storage.setChosenOption(question, option: optionData)
+                        self.setChosenOption(question, optionData)
                         self.lastChosenOptionId = optionData.id
 //                        print(lastChosenOptionId)
                     }, label: {
@@ -43,10 +43,6 @@ struct RadioButtonList: View {
                 )
                 .cornerRadius(12)
                 .padding(.top, 10)
-                .onAppear {
-                    self.lastChosenOptionId = storage.getChosenOption(question)
-//                    print(lastChosenOptionId)
-                }
                 
             }
             .padding(0)

@@ -31,83 +31,38 @@ public class LocalLearner: ObservableObject {
 
     private let userDefaultsKey = "current_learner"
     private var lastLearnerUpdateAttempt: Date?
-
-    public var isAnAbsoluteChad: Bool {
-        guard  let learner = learner else {
-            print(#function, "learner is not initialized yet")
-            return false
-        }
-        
-        guard let _ = learner.goal else {
-            print(#function, "learner doesn't have a goal")
-            return false
-        }
-        
-        guard let localHistory = EngagementService.shared.localEngagementHistory else {
-            print(#function, "history is not initialized yet")
-            return false
-        }
-        
-        let containsFirstLaunch = localHistory.contains(where: {$0.activityId == "launch" && $0.value == 1 })
-        let hasLongEnoughHistory = localHistory.count > 100
-        
-        return containsFirstLaunch && hasLongEnoughHistory
-    }
     
-    public func kickstartLocalLearner(analyticsId: UUID) {
+    public func kickstartLocalLearner(analyticsId: UUID, learnerPropertyKeys: [String]) {
                 
         if let localLearner = retrieveLocalLearner() {
             self.learner = localLearner
+            self.learner?.id = analyticsId
         } else if let appBuildVersion = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
-            self.learner = Learner(id: analyticsId, gender: nil, language: nil, countryCode: nil, city: nil, priorKnowledge: nil, goal: nil, properties: nil, bundleVersionAtInstall: appBuildVersion)
+            self.learner = Learner(id: analyticsId)
+            learnerStorage.store(appBuildVersion, forKey: "bundleVersionAtInstall")
         } else {
             print(#function, "error creating a learner")
         }
         
+        learnerPropertyKeys.forEach { key in
+            if let value = learnerStorage.retrieve(forKey: key) as? String {
+                self.learner?.properties[key] = value
+            }
+        }
+        saveLocalLearner()
+        
     }
     
-    public func setFCMToken(_ fcmToken: String) {
-        if let storedToken = self.learner?.fcmToken,
-           storedToken == fcmToken {
-            // do nothing
-        } else {
-            self.learner?.fcmToken = fcmToken
-            updateLocalLearner()
-        }
+    public func getProperty(_ key: String) -> String? {
+        self.learner?.properties[key]
     }
     
     public func setProperty(_ value: String, forKey key: String) {
-        self.learner?.properties?[key] = value
-        updateLocalLearner()
+        self.learner?.properties[key] = value
+        saveLocalLearner()
     }
     
-    /// update local => save local => update remote
-    
-    func updateLocalLearner() {
-        
-        guard var learner = self.learner else {
-            print("the current learner or local user is nil")
-            return
-        }
-        
-        if let analyticsIdString = learnerStorage.retrieve(forKey: LearnerProperties.analyticsId.rawValue) as? String,
-           let analyticsId = UUID(uuidString: analyticsIdString) {
-            learner.id = analyticsId
-        }
-        learner.gender = learnerStorage.retrieve(forKey: LearnerProperties.gender.rawValue) as? Int ?? 0
-        learner.language = learnerStorage.retrieve(forKey: LearnerProperties.language.rawValue) as? Int ?? 0
-        learner.countryCode = learnerStorage.retrieve(forKey: LearnerProperties.countryCode.rawValue) as? String
-        learner.city = learnerStorage.retrieve(forKey: LearnerProperties.city.rawValue) as? String
-        learner.ageRange = learnerStorage.retrieve(forKey: LearnerProperties.ageRange.rawValue) as? String
-        learner.marketingSource =  learnerStorage.retrieve(forKey: LearnerProperties.marketingSource.rawValue) as? String
-        learner.priorKnowledge = learnerStorage.retrieve(forKey: LearnerProperties.knowledgeLevel.rawValue) as? String
-        learner.goal = learnerStorage.retrieve(forKey: LearnerProperties.motivation.rawValue) as? String
-        
-        DispatchQueue.main.async {
-            self.learner = learner
-            self.saveLocalLearner()
-        }
-    }
+    /// save local => update remote
     
     private func saveLocalLearner() {
         

@@ -43,7 +43,7 @@ public class Analytics: NSObject {
         var incrementedLauchCount = launchCount + 1
         learnerStorage.store(incrementedLauchCount, forKey: launchCountKey)
         logActivity("launch", type: "action", value: Double(incrementedLauchCount), startDate: Date())
-        setUserProperty(LearnerProperties.appOpenCount.rawValue, value: String(launchCount))
+        setUserProperty(launchCountKey, value: String(launchCount))
     }
     
     
@@ -62,12 +62,7 @@ public class Analytics: NSObject {
         print("setUserProperty:", property, "| value:", "\(value)")
         
         if #available(iOS 13.0, *) {
-            switch property {
-            case LearnerProperties.gender.rawValue, LearnerProperties.language.rawValue, LearnerProperties.countryCode.rawValue, LearnerProperties.ageRange.rawValue, LearnerProperties.marketingSource.rawValue, LearnerProperties.knowledgeLevel.rawValue, LearnerProperties.motivation.rawValue:
-                LocalLearner.shared.updateLocalLearner()
-            default:
-                LocalLearner.shared.setProperty("\(value)", forKey: property)
-            }
+            LocalLearner.shared.setProperty("\(value)", forKey: property)
         }
         
         

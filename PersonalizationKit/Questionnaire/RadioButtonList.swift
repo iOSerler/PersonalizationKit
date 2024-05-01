@@ -13,8 +13,9 @@ struct RadioButtonList: View {
     let question: QuestionData
     let assets: PersonalizationAssets
     
-    @State var lastChosenOptionId: String
+
     let setChosenOption: (QuestionData, OptionData) -> Void
+    let getLastChosenOption: (QuestionData) -> String
     
     var body: some View {
         ScrollView {
@@ -23,8 +24,6 @@ struct RadioButtonList: View {
                 Button(
                     action: {
                         self.setChosenOption(question, optionData)
-                        self.lastChosenOptionId = optionData.id
-//                        print(lastChosenOptionId)
                     }, label: {
                         HStack {
                             Text(optionData.emoji)
@@ -38,7 +37,7 @@ struct RadioButtonList: View {
                         .frame(width: UIScreen.main.bounds.width - 60, height: 66, alignment: .leading)
                         .overlay(RoundedRectangle(cornerRadius: 12)
                         .stroke(Color(assets.borderColor), lineWidth: 2))
-                        .background(self.lastChosenOptionId == optionData.id ? Color(assets.primaryColor.withAlphaComponent(0.3)) : Color.clear)
+                        .background(self.getLastChosenOption(question) == optionData.id ? Color(assets.primaryColor.withAlphaComponent(0.3)) : Color.clear)
                     }
                 )
                 .cornerRadius(12)

@@ -25,113 +25,58 @@ public struct LearnerProfileView: View {
     
     public var body: some View {
         List {
-            
-            if let learner = localLearner.learner {
+            if let learnerProperties = localLearner.learner?.properties {
                 Section(header: Text("learnerProfile".localized())) {
-                    if let city = learner.city {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("cityIP".localized())
-                                .multilineTextAlignment(.leading)
-                                .font(.footnote)
-                                .foregroundColor(.gray)
-                            Text(city)
-                                .multilineTextAlignment(.leading)
-                        }
-                    }
-                                        
-                    if let question = personalizationQuestions.first(where: {$0.id == "knowledge_level"}),
-                       let priorKnowledge = learner.priorKnowledge,
-                       let option = question.optionsData.first(where: {$0.id == priorKnowledge}){
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(question.title)
-                                .multilineTextAlignment(.leading)
-                                .font(.footnote)
-                                .foregroundColor(.gray)
-                            Text("\(option.text)")
-                                .multilineTextAlignment(.leading)
-                        }
-                    }
                     
-                    
-                    if let question = personalizationQuestions.first(where: {$0.id == "motivation"}),
-                       let goal = learner.goal,
-                       let option = question.optionsData.first(where: {$0.id == goal}){
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(question.title)
-                                .multilineTextAlignment(.leading)
-                                .font(.footnote)
-                                .foregroundColor(.gray)
-                            Text("\(option.text)")
-                                .multilineTextAlignment(.leading)
+                    ForEach(learnerProperties.sorted(by: { $0.key < $1.key }), id: \.key) { key, value in
+                        if let question = personalizationQuestions.first(where: {$0.id == key}),
+                           let option = question.optionsData.first(where: {$0.id == value}){
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(question.title)
+                                    .multilineTextAlignment(.leading)
+                                    .font(.footnote)
+                                    .foregroundColor(.gray)
+                                Text("\(option.text)")
+                                    .multilineTextAlignment(.leading)
+                            }
+                        } else {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(key.localized())
+                                    .multilineTextAlignment(.leading)
+                                    .font(.footnote)
+                                    .foregroundColor(.gray)
+                                Text(value)
+                                    .multilineTextAlignment(.leading)
+                            }
                         }
-                    }
-                    
-                    if let question = personalizationQuestions.first(where: {$0.id == "age_range"}),
-                       let ageRange = learner.ageRange,
-                       let option = question.optionsData.first(where: {$0.id == ageRange}){
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(question.title)
-                                .multilineTextAlignment(.leading)
-                                .font(.footnote)
-                                .foregroundColor(.gray)
-                            Text("\(option.text)")
-                                .multilineTextAlignment(.leading)
-                        }
-                    }
-                    
-                    if let question = personalizationQuestions.first(where: {$0.id == "marketing_source"}),
-                       let marketingSource = learner.marketingSource,
-                       let option = question.optionsData.first(where: {$0.id == marketingSource}){
                         
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(question.title)
-                                .multilineTextAlignment(.leading)
-                                .font(.footnote)
-                                .foregroundColor(.gray)
-                            Text("\(option.text)")
-                                .multilineTextAlignment(.leading)
-                        }
                     }
                     
                     Button("updateLearnerInfo".localized()) {
                         personalizationAction?()
                     }
-                    
-                    
-                    
-                    //                    if let properties = learner.properties {
-                    //                        ForEach(properties.sorted(by: { $0.key < $1.key }), id: \.key) { key, value in
-                    //                            Text("\(key): \(value)")
-                    //                        }
-                    //                    }
                 }
             }
             
             if let engagements = engagementService.localEngagementHistory {
                 Section("activitiesHistory".localized()) {
                     
-                    let filteredEngagements = Array(engagements.filter({ ["audio", "prayer", "article", "quiz", "test"].contains($0.type) }).reversed())
+                    let filteredEngagements = Array(engagements.filter({ ["audio", "prayer", "article", "quiz", "test", "navigation"].contains($0.type) }).reversed())
                     
                     ForEach(showFullHistory ? filteredEngagements : Array(filteredEngagements.prefix(5)), id: \.id) { engagement in
                         
-                        if engagement.type == "audio", let value = engagement.value {
-                            
+                        let value = engagement.value != nil ? engagement.value! : -1
+                        
+                        switch engagement.type {
+                        case "audio":
                             let valueString = value > 0 ? "\(Int(value))x" : "-"
                             HistoryItemView(title: engagement.activityId, image: "play.circle", date: formattedDate(engagement.completionDate ?? Date()), type: "audio".localized(), value: valueString)
-                            
-                        } else if engagement.type == "prayer", let value = engagement.value {
-                            
+                        case "article", "prayer","quiz", "test":
                             let valueString = value > 0 ? "\(Int(value*100))%" : "-"
-                            HistoryItemView(title: engagement.activityId, image: "cube.fill", date: formattedDate(engagement.completionDate ?? Date()), type: "fardPrayer".localized(), value: valueString)
-                            
-                        } else if engagement.type == "article", let value = engagement.value {
-                            let valueString = value > 0 ? "\(Int(value*100))%" : "-"
-                            HistoryItemView(title: engagement.activityId, image: "doc.append", date: formattedDate(engagement.completionDate ?? Date()), type: "article".localized(), value: valueString)
-                            
-                        } else if (engagement.type == "quiz" || engagement.type == "test"), let value = engagement.value {
-                            let valueString = value > 0 ? "\(Int(value*100))%" : "-"
-                            HistoryItemView(title: engagement.activityId, image: "flag", date: formattedDate(engagement.completionDate ?? Date()), type: "quiz".localized(), value: valueString)
-                            
+                            let image = engagement.type == "prayer" ? "cube.fill" : "doc.append"
+                            HistoryItemView(title: engagement.activityId, image: image, date: formattedDate(engagement.completionDate ?? Date()), type: engagement.type.localized(), value: valueString)
+                        default:
+                            HistoryItemView(title: engagement.activityId, image: "platter.filled.top.iphone", date: formattedDate(engagement.completionDate ?? Date()), type: engagement.type.localized(), value: "-")
                         }
                     }
                     

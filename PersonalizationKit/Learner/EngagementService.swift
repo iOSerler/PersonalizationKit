@@ -76,59 +76,59 @@ public class EngagementService: ObservableObject {
             localEngagementHistory?.append(engagement)
         }
 
-//        /// check that he is a premium user
-//        guard LocalUser.shared.isPremium else {
+//        /// if it's a premium user, add to remote history
+//        guard let learnerType = LocalLearner.shared.getProperty(LearnerProperties.learnerType.rawValue),
+//              learnerType == "premium" else {
 //            return
 //        }
 //        
-        /// add to remote history
-        Task {
-            do {
-                let engagement = try await addEngagementToRemoteHistory(engagement)
-                learnerStorage.store(true, forKey: "\(engagement.id)")
-            } catch {
-                print(#function, "error: \(error.localizedDescription)")
-            }
-        }
-        
-    }
-        
-    public func addEngagementToRemoteHistory(_ engagement: Engagement) async throws -> Engagement {
-        
-        /// add to remote history
-        guard let url = URL(string: engagementUrl) else {
-            throw ServiceError.failedURLInitialization
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        do {
-            let requestBody = try JSONEncoder().encode(engagement)
-            request.httpBody = requestBody
-        } catch {
-            print("Failed to encode engagement: \(error.localizedDescription)")
-        }
-        
-        do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            guard let httpResponse = response as? HTTPURLResponse,
-                  (200...299).contains(httpResponse.statusCode) else {
-                print(#function, "Failed with response: \( (response as? HTTPURLResponse)?.statusCode ?? 0 )", String(data: data, encoding: .utf8) ?? "")
-                throw ServiceError.requestFailed
-            }
-            guard let engagement = try? JSONDecoder().decode(Engagement.self, from: data) else {
-                print(#function, "Failed to decode", String(data: data, encoding: .utf8) ?? "")
-                throw ServiceError.decodingFailed
-            }
-            
-//            print(#function, "engagement added to remote history:", engagement)
-            return engagement
-        } catch {
-            print(#function, "Failed with error: \(error.localizedDescription)")
-            throw error
-        }
+//        Task {
+//            do {
+//                let engagement = try await addEngagementToRemoteHistory(engagement)
+//                learnerStorage.store(true, forKey: "\(engagement.id)")
+//            } catch {
+//                print(#function, "error: \(error.localizedDescription)")
+//            }
+//        }
+//        
+//    }
+//        
+//    public func addEngagementToRemoteHistory(_ engagement: Engagement) async throws -> Engagement {
+//        
+//        /// add to remote history
+//        guard let url = URL(string: engagementUrl) else {
+//            throw ServiceError.failedURLInitialization
+//        }
+//        
+//        var request = URLRequest(url: url)
+//        request.httpMethod = "POST"
+//        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+//        
+//        do {
+//            let requestBody = try JSONEncoder().encode(engagement)
+//            request.httpBody = requestBody
+//        } catch {
+//            print("Failed to encode engagement: \(error.localizedDescription)")
+//        }
+//        
+//        do {
+//            let (data, response) = try await URLSession.shared.data(for: request)
+//            guard let httpResponse = response as? HTTPURLResponse,
+//                  (200...299).contains(httpResponse.statusCode) else {
+//                print(#function, "Failed with response: \( (response as? HTTPURLResponse)?.statusCode ?? 0 )", String(data: data, encoding: .utf8) ?? "")
+//                throw ServiceError.requestFailed
+//            }
+//            guard let engagement = try? JSONDecoder().decode(Engagement.self, from: data) else {
+//                print(#function, "Failed to decode", String(data: data, encoding: .utf8) ?? "")
+//                throw ServiceError.decodingFailed
+//            }
+//            
+////            print(#function, "engagement added to remote history:", engagement)
+//            return engagement
+//        } catch {
+//            print(#function, "Failed with error: \(error.localizedDescription)")
+//            throw error
+//        }
     }
     
     public func addAllNewEngagementsToRemoteHistory() async throws -> [Engagement] {

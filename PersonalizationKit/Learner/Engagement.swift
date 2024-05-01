@@ -14,7 +14,7 @@ public struct Engagement: Codable {
     var learnerId: UUID
     public let activityId: String
     public let type: String
-    let value: Double?
+    public let value: Double?
     let startDateString: String?
     let completionDateString: String?
     

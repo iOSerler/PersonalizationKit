@@ -22,13 +22,13 @@ enum ServiceError: Error {
 public class ActivityService: ObservableObject {
     
     /// set it before using the singleton
-    public static var initialStaticStorage: LearnerStorage! = nil {
+    public static var staticStorage: LearnerStorage! = nil {
         didSet {
-            shared = ActivityService(learnerStorage: initialStaticStorage)
+            shared = ActivityService(learnerStorage: staticStorage)
         }
     }
 
-    public static var shared = ActivityService(learnerStorage: initialStaticStorage)
+    public static var shared = ActivityService(learnerStorage: staticStorage)
     
     private init(learnerStorage: LearnerStorage) {
         self.learnerStorage = learnerStorage

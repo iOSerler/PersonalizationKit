@@ -12,13 +12,13 @@ import Foundation
 public class LocalLearner: ObservableObject {
     
     /// set it before using the singleton
-    public static var initialStaticStorage: LearnerStorage! = nil {
+    public static var staticStorage: LearnerStorage! = nil {
         didSet {
-            shared = LocalLearner(learnerStorage: initialStaticStorage)
+            shared = LocalLearner(learnerStorage: staticStorage)
         }
     }
 
-    public static var shared = LocalLearner(learnerStorage: initialStaticStorage)
+    public static var shared = LocalLearner(learnerStorage: staticStorage)
     
     private init(learnerStorage: LearnerStorage) {
         self.learnerStorage = learnerStorage

@@ -8,7 +8,7 @@
 
 import Foundation
 
-@available(iOS 15.0, *)
+@available(iOS 13.0, *)
 public class LearnerService {
     
     public static let shared = LearnerService()

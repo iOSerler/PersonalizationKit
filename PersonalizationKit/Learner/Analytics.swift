@@ -11,13 +11,13 @@ import Foundation
 public class Analytics: NSObject {
     
     /// set it before using the singleton
-    public static var initialStaticStorage: LearnerStorage! = nil {
+    public static var staticStorage: LearnerStorage! = nil {
         didSet {
-            shared = Analytics(learnerStorage: initialStaticStorage)
+            shared = Analytics(learnerStorage: staticStorage)
         }
     }
 
-    public static var shared = Analytics(learnerStorage: initialStaticStorage)
+    public static var shared = Analytics(learnerStorage: staticStorage)
     
     private init(learnerStorage: LearnerStorage) {
         self.learnerStorage = learnerStorage

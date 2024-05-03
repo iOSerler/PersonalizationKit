@@ -49,11 +49,11 @@ public class Analytics: NSObject {
     
     public func logActivity(_ activityId: String, type: String, value: Double?, startDate: Date) {
         
-        print("engagement:", activityId, "| type:", type, "| value:", value ?? 0, "| startDate:", startDate)
+        print("log:", activityId, "| type:", type, "| value:", value ?? 0, "| startDate:", startDate)
         
         if #available(iOS 13, *) {
-            if let engagement = Engagement(activityId: activityId, type: type, value: value, startDate: startDate) {
-                EngagementService.shared.addEngagementToHistory(engagement)
+            if let activityLog = ActivityLog(activityId: activityId, type: type, value: value, startDate: startDate) {
+                ActivityService.shared.logActivityToHistory(activityLog)
             }
         }
     }

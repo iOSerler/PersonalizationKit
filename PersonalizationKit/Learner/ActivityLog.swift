@@ -1,5 +1,5 @@
 //
-//  Engagement.swift
+//  ActivityLog.swift
 //  namaz
 //
 //  Created by Nursultan Askarbekuly on 09.08.2023.
@@ -9,8 +9,8 @@
 import Foundation
 
 @available(iOS 13, *)
-public struct Engagement: Codable {
-    let id: UUID
+public struct ActivityLog: Codable, Identifiable {
+    public let id: UUID
     var learnerId: UUID
     public let activityId: String
     public let type: String
@@ -25,7 +25,7 @@ public struct Engagement: Codable {
         return startDateString.isoStringToDate()
     }
     
-    var completionDate: Date? {
+    public var completionDate: Date? {
         guard let completionDateString = completionDateString else {
             return nil
         }

@@ -7,6 +7,9 @@
 
 import Foundation
 
+var suiteName = "group.com.nurios.namazapp"
+var serverUrl = "https://namazlive.herokuapp.com"
+
 enum Language: Int {
     case english = 0
     case russian = 1
@@ -16,7 +19,7 @@ enum Language: Int {
 var globalLanguage: Language {
     
     /// check if language is already set
-    if let langIndex = UserDefaults(suiteName: "group.com.nurios.namazapp")?.object(forKey: "language") as? Int {
+    if let langIndex = UserDefaults(suiteName: suiteName)?.object(forKey: "language") as? Int {
         return Language(rawValue: langIndex) ?? .english
     }
     

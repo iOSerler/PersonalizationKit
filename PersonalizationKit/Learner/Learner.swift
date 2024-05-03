@@ -10,7 +10,7 @@ import Foundation
 
 public struct Learner: Codable {
     var id: UUID
-    var properties: [String: String]
+    public var properties: [String: String]
 
     enum CodingKeys: String, CodingKey {
         case id

@@ -14,11 +14,7 @@ public class LearnerService {
     public static let shared = LearnerService()
     var remoteLearner: Learner?
 
-    private var learnerUrl = "https://namazlive.herokuapp.com/learners"
-    
-    public func switchToFirestore() {
-        learnerUrl = "https://namazlive.herokuapp.com/learners/fs"
-    }
+    private var learnerUrl = "\(serverUrl)/learner"
     
     public func kickstartRemoteLearner() {
         
@@ -98,7 +94,7 @@ public class LearnerService {
     }
     
     public func getRemoteLearner(_ id: String) async throws -> Learner {
-        
+        /// FIXME can it get the learner from firestore? ≥,fdscaxz
         guard let url = URL(string: "\(learnerUrl)/\(id)") else {
             print(#function, "Failed URL initialization")
             throw ServiceError.failedURLInitialization

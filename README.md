@@ -4,7 +4,7 @@
 `PersonalizationKit` is designed to streamline the management of learner data, activities, and analytics. Follow these instructions to integrate and initialize the library in your iOS project.
 
 ## Prerequisites
-Ensure you have `PersonalizationKit` installed in your project. If it's distributed as a pod. Add it to your project repo as a submodule, then add this line to your podfile:
+`PersonalizationKit` is distributed as a pod. Add it to your project repo as a submodule, then add this line to your podfile:
 
 ```
 pod 'PersonalizationKit', :path => "./PersonalizationKit"
@@ -36,7 +36,7 @@ Initialize each service with the necessary configuration. This typically involve
 ```swift
 // Initialize the Local Learner
 LocalLearner.shared.kickstartLocalLearner(
-    analyticsId: localUser.analyticsId,
+    analyticsId: {add_some_persistent_uuid_assigned_to_your_user},
     learnerPropertyKeys: LearnerProperties.allCases.map { $0.rawValue }
 )
 
@@ -47,11 +47,32 @@ ActivityService.shared.kickstartActivityService()
 Analytics.shared.incrementLaunchCount()
 ```
 
+The learner properties enum needs to be defined by you, as you decide what properties you care about. For example, it can be something like this:
+```swift
+public enum LearnerProperties: String, CaseIterable {
+    case gender
+    case language
+    
+    case learnerType = "learner_type"
+    
+    case fcmToken = "fcm_token"
+    
+    case launchCount = "launch_count"// "appOpenedCount"
+    case bundleVersionAtInstall = "bundleVersionAtInstall" /// eventually replace with "bundle_version_at_install"
+    
+    case countryCode = "country_code"
+    case city
+
+    case experimentParticipant = "experiment_participant"
+}
+```
+
 ### Step 4: Advanced Configuration
 Check for certain conditions to decide whether to synchronize data with a remote server or perform additional initializations:
 
 ```swift
-if let _ = LocalLearner.shared.getProperty(LearnerProperties.goal.rawValue),
+if let launchCount = Int(LocalLearner.shared.getProperty(LearnerProperties.launchCount.rawValue)),
+   launchCount > 2,
    let localHistory = ActivityService.shared.localActivityHistory,
    localHistory.count > 100,
    localHistory.contains(where: {$0.activityId == "launch" && $0.value == 1 }) {

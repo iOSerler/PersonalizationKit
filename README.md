@@ -4,12 +4,19 @@
 `PersonalizationKit` is designed to streamline the management of learner data, activities, and analytics. Follow these instructions to integrate and initialize the library in your iOS project.
 
 ## Prerequisites
-`PersonalizationKit` is distributed as a pod. Add it to your project repo as a submodule, then add this line to your podfile:
 
+`PersonalizationKit` is can be installed as a pod. 
+
+Add it to your project repo as a submodule: 
+```
+git submodule add git@github.com:iOSerler/PersonalizationKit.git
+```
+
+Then add this line to your podfile:
 ```
 pod 'PersonalizationKit', :path => "./PersonalizationKit"
 ```
-
+The run `pod install` in the terminal. 
 
 ## Step-by-step Initialization
 
@@ -24,11 +31,15 @@ import PersonalizationKit
 
 First, you need to define an instance of the `LearnerStorage` protocol. Any storage can be used, even UserDefaults. Example below implements `LocalStorage`.
 
-```
+```swift
 import Foundation
 import PersonalizationKit
 
 class LocalStorage: NSObject, LearnerStorage {
+
+    var serverUrl: String =  "https://yourbackend.server"
+    var learnerCollectionName: String = "appname_learner"
+    var activtyLogCollectionName: String = "activity_log"
     
     static let shared = LocalStorage()
     
@@ -65,9 +76,6 @@ class LocalStorage: NSObject, LearnerStorage {
         key.localized()
     }
     
-    var serverUrl: String =  "http://0.0.0.0:80"
-    var learnerCollectionName: String = "learner"
-    var activtyLogCollectionName: String = "engagement"
 }
 
 ```

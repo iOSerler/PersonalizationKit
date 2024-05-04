@@ -22,12 +22,63 @@ import PersonalizationKit
 
 ### Step 2: Configure Storage
 
-Set the static storage for learner, activity, and analytics components. This storage is used across the application for saving and retrieving data persistently.
+First, you need to define an instance of the `LearnerStorage` protocol. Any storage can be used, even UserDefaults. Example below implements `LocalStorage`.
+
+```
+import Foundation
+import PersonalizationKit
+
+class LocalStorage: NSObject, LearnerStorage {
+    
+    static let shared = LocalStorage()
+    
+    func store(_ anyObject: Any, forKey key: String) {
+        UserDefaults.standard.set(anyObject, forKey: key)
+        UserDefaults.standard.synchronize()
+    }
+    
+    func retrieve(forKey key: String) -> Any? {
+        if let any = UserDefaults.standard.object(forKey: key) {
+            return any
+        } else if let any = UserDefaults.standard.object(forKey: key) {
+            return any
+        } else {
+            return nil
+        }
+    }
+    
+    func remove(forKey key: String) {
+        UserDefaults.standard.removeObject(forKey: key)
+        UserDefaults.standard.synchronize()
+        
+        UserDefaults.standard.removeObject(forKey: key)
+        UserDefaults.standard.synchronize()
+    }
+    
+    func getAllItemKeys(withPrefix: String) -> [String] {
+        return Array(UserDefaults.standard.dictionaryRepresentation().keys.filter { (key) -> Bool in
+                return key.contains(withPrefix)
+        } ?? [])
+    }
+    
+    func localizedString(forKey key: String) -> String {
+        key.localized()
+    }
+    
+    var serverUrl: String =  "http://0.0.0.0:80"
+    var learnerCollectionName: String = "learner"
+    var activtyLogCollectionName: String = "engagement"
+}
+
+```
+
+We then set the static storage for learner, activity, and analytics components. This storage is used across the application for saving and retrieving data persistently.
 
 ```swift
 LocalLearner.staticStorage = LocalStorage.shared
 ActivityService.staticStorage = LocalStorage.shared
-Analytics.initialStaticStorage = LocalStorage.shared
+LearnerService.staticStorage = LocalStorage.shared
+Analytics.staticStorage = LocalStorage.shared
 ```
 
 ### Step 3: Initialize Services

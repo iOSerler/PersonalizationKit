@@ -42,7 +42,7 @@ public class ActivityService: ObservableObject {
         }
     }
 
-    private let analyticsUrl = "\(serverUrl)/analytics"
+    private lazy var analyticsUrl = "\(learnerStorage.serverUrl)/analytics/\(learnerStorage.activtyLogCollectionName)"
     private let userDefaultsKey = "engagement_history"
     
     public func kickstartActivityService() {
@@ -83,7 +83,7 @@ public class ActivityService: ObservableObject {
         
         var activitiesToBeLogged: [ActivityLog] = []
         
-        for localLog in localActivityHistory ?? [] {
+        for localLog in localActivityHistory?.sorted(by: {$0.startDate ?? Date() < $1.startDate ?? Date()}) ?? [] {
             
             if learnerStorage.retrieve(forKey: "\(localLog.id)") as? Bool ?? false {
                 /// skipping item as it was already marked as reported

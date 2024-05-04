@@ -7,9 +7,11 @@
 
 import Foundation
 
-var serverUrl = "https://namazlive.herokuapp.com"
-
 public protocol LearnerStorage {
+    
+    var serverUrl: String {get}
+    var learnerCollectionName: String {get}
+    var activtyLogCollectionName: String {get}
     
     func store(_ anyObject: Any, forKey key: String)
     
@@ -20,7 +22,5 @@ public protocol LearnerStorage {
     func getAllItemKeys(withPrefix: String) -> [String]
     
     func localizedString(forKey key: String) -> String
-    
-    static var isRussian: Bool { get }
-    
+        
 }

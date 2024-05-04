@@ -11,10 +11,24 @@ import Foundation
 @available(iOS 13.0, *)
 public class LearnerService {
     
-    public static let shared = LearnerService()
+    /// set it before using the singleton
+    public static var staticStorage: LearnerStorage! = nil {
+        didSet {
+            shared = LearnerService(learnerStorage: staticStorage)
+        }
+    }
+
+    public static var shared = LearnerService(learnerStorage: staticStorage)
+    
+    private init(learnerStorage: LearnerStorage) {
+        self.learnerStorage = learnerStorage
+    }
+    
+    private let learnerStorage: LearnerStorage
+    
     var remoteLearner: Learner?
 
-    private var learnerUrl = "\(serverUrl)/learner"
+    private lazy var learnerUrl = "\(learnerStorage.serverUrl)/learner/\(learnerStorage.learnerCollectionName)"
     
     public func kickstartRemoteLearner() {
         

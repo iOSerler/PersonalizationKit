@@ -5,7 +5,7 @@
 
 ## Prerequisites
 
-`PersonalizationKit` is can be installed as a pod. 
+`PersonalizationKit` can be integrated into your project as a pod. 
 
 Add it to your project repo as a submodule: 
 ```

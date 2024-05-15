@@ -62,7 +62,7 @@ public class ActivityService: ObservableObject {
         Task {
             do {
                 let remotelyAddedActivityLogs = try await logActivitiesToRemoteHistory()
-                    print("successfully logged activities to remote storage:", remotelyAddedActivityLogs)
+                print("successfully logged activities to remote storage:", remotelyAddedActivityLogs.map{ "\($0.activityId) \($0.value ?? 0)"})
             } catch {
                 print(#function, "error logging activities to remote storage: \(error.localizedDescription )")
             }
@@ -136,7 +136,7 @@ public class ActivityService: ObservableObject {
                 learnerStorage.store(true, forKey: "\(log.id)")
             }
             
-            print(#function, "activities logged to remote history:", activityLogs)
+//            print(#function, "activities logged to remote history:", activityLogs)
             return activityLogs
         } catch {
             // Handle other errors

@@ -40,10 +40,12 @@ public class LearnerService {
         Task {
             do {
                 self.remoteLearner = try await self.getRemoteLearner("\(localLearner.id)")
+                print("successfully got remote learner")
             } catch(let getLearnerError) {
                 print(#function, "error getting remote learner", getLearnerError.localizedDescription)
                 do {
                     self.remoteLearner = try await self.createRemoteLearner()
+                    print("successfully created remote learner")
                 } catch(let createLearnerError) {
                     print(#function, "error creating remote learner", createLearnerError.localizedDescription)
                     return

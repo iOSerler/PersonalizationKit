@@ -17,7 +17,7 @@ public struct ActivityLog: Codable, Identifiable {
     public let value: Double?
     let startDateString: String?
     let completionDateString: String?
-    let appVersion: String?
+    let buildVersion: String?
     
     var startDate: Date? {
         guard let startDateString = startDateString else {
@@ -41,7 +41,7 @@ public struct ActivityLog: Codable, Identifiable {
         case value
         case startDateString = "start_date"
         case completionDateString = "completion_date"
-        case appVersion = "app_version"
+        case buildVersion = "build_version"
     }
     
     
@@ -74,7 +74,7 @@ public struct ActivityLog: Codable, Identifiable {
         self.value = value
         self.startDateString = startDateString
         self.completionDateString = completionDateString
-        self.appVersion = appVersion
+        self.buildVersion = appVersion
     }
 
 }

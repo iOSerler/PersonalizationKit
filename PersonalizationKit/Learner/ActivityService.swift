@@ -61,7 +61,7 @@ public class ActivityService: ObservableObject {
     public func syncActivitiesToFS() {
         Task {
             do {
-                let remotelyAddedActivityLogs = try await logActivitiesToRemoteHistory()
+                let remotelyAddedActivityLogs = try await logActivitiesToRemoteHistory(minActivitiesToLogCount: 0)
                 print("successfully logged activities to remote storage:", remotelyAddedActivityLogs.map{ "\($0.activityId) \($0.value ?? 0)"})
             } catch {
                 print(#function, "error logging activities to remote storage: \(error.localizedDescription )")
@@ -79,7 +79,7 @@ public class ActivityService: ObservableObject {
         }
     }
     
-    public func logActivitiesToRemoteHistory() async throws -> [ActivityLog] {
+    public func logActivitiesToRemoteHistory(minActivitiesToLogCount: Int = 100) async throws -> [ActivityLog] {
         
         var activitiesToBeLogged: [ActivityLog] = []
         
@@ -99,7 +99,7 @@ public class ActivityService: ObservableObject {
         }
         
         
-        if activitiesToBeLogged.count < 100 {
+        if activitiesToBeLogged.count < minActivitiesToLogCount {
             print("too few new logs, no need to upload yet.")
             return []
         }

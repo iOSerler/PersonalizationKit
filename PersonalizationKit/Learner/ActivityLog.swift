@@ -12,9 +12,11 @@ import Foundation
 public struct ActivityLog: Codable, Identifiable {
     public let id: UUID
     var learnerId: UUID
-    public let activityId: String
+    
     public let type: String
+    public let activityId: String
     public let value: Double?
+    
     let startDateString: String?
     let completionDateString: String?
     let buildVersion: String?

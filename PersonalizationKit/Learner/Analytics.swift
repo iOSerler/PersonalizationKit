@@ -49,7 +49,7 @@ public class Analytics: NSObject {
     
     public func logActivity(_ activityId: String, type: String, value: Double?, startDate: Date) {
         
-        print("log:", activityId, "| type:", type, "| value:", value ?? 0, "| startDate:", startDate)
+        print("log:", type, "->", activityId, "->", value ?? "nil", "| startDate:", startDate)
         
         if #available(iOS 13, *) {
             if let activityLog = ActivityLog(activityId: activityId, type: type, value: value, startDate: startDate, appVersion: learnerStorage.currentAppVersion) {

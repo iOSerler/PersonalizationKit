@@ -42,12 +42,12 @@ public class Analytics: NSObject {
     public func incrementLaunchCount() {
         var incrementedLauchCount = launchCount + 1
         learnerStorage.store(incrementedLauchCount, forKey: launchCountKey)
-        logActivity("launch", type: "action", value: Double(incrementedLauchCount), startDate: Date())
+        logActivity("launch", type: "action", value: String(incrementedLauchCount), startDate: Date())
         setUserProperty(launchCountKey, value: String(launchCount))
     }
     
     
-    public func logActivity(_ activityId: String, type: String, value: Double?, startDate: Date) {
+    public func logActivity(_ activityId: String, type: String, value: String?, startDate: Date) {
         
         print("log:", type, "->", activityId, "->", value ?? "nil", "| startDate:", startDate)
         

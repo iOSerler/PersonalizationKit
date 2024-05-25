@@ -15,7 +15,7 @@ public struct ActivityLog: Codable, Identifiable {
     
     public let type: String
     public let activityId: String
-    public let value: Double?
+    public let value: String?
     
     let startDateString: String?
     let completionDateString: String?
@@ -49,7 +49,7 @@ public struct ActivityLog: Codable, Identifiable {
     
     init?(activityId: String,
           type: String,
-          value: Double?,
+          value: String?,
           startDate: Date,
           appVersion: String?) {
             

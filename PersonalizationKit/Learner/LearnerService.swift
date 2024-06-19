@@ -39,7 +39,7 @@ public class LearnerService {
         
         Task {
             do {
-                self.remoteLearner = try await self.getRemoteLearner("\(localLearner.id)")
+                self.remoteLearner = try await self.getRemoteLearner(localLearner.id.uuidString.lowercased())
                 print("successfully got remote learner")
             } catch(let getLearnerError) {
                 print(#function, "error getting remote learner", getLearnerError.localizedDescription)

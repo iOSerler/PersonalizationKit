@@ -42,17 +42,17 @@ public class Analytics: NSObject {
     public func incrementLaunchCount() {
         var incrementedLauchCount = launchCount + 1
         learnerStorage.store(incrementedLauchCount, forKey: launchCountKey)
-        logActivity("launch", type: "action", value: Double(incrementedLauchCount), startDate: Date())
+        logActivity("launch", type: "action", value: String(incrementedLauchCount), startDate: Date())
         setUserProperty(launchCountKey, value: String(launchCount))
     }
     
     
-    public func logActivity(_ activityId: String, type: String, value: Double?, startDate: Date) {
+    public func logActivity(_ activityId: String, type: String, value: String?, startDate: Date) {
         
         print("log:", type, "->", activityId, "->", value ?? "nil", "| startDate:", startDate)
         
         if #available(iOS 13, *) {
-            if let activityLog = ActivityLog(activityId: activityId, type: type, value: value, startDate: startDate, appVersion: learnerStorage.currentAppVersion) {
+            if let activityLog = ActivityLog(activityId: activityId, type: type, value: value, startDate: startDate, buildVersion: learnerStorage.currentAppVersion) {
                 ActivityService.shared.logActivityToHistory(activityLog)
             }
         }

@@ -32,23 +32,25 @@ public class LocalLearner: ObservableObject {
     private let userDefaultsKey = "current_learner"
     private var lastLearnerUpdateAttempt: Date?
     
-    public func kickstartLocalLearner(analyticsId: UUID, learnerPropertyKeys: [String]) {
+    public func kickstartLocalLearner(predefinedAnalyticsId: UUID? = nil, learnerPropertyKeys: [String]) {
                 
         if let localLearner = retrieveLocalLearner() {
             self.learner = localLearner
-            self.learner?.id = analyticsId
+            if let predefinedAnalyticsId {
+                self.learner?.id = predefinedAnalyticsId
+            }
         } else if let appBuildVersion = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
-            self.learner = Learner(id: analyticsId)
+            self.learner = Learner(id: predefinedAnalyticsId ?? UUID())
             learnerStorage.store(appBuildVersion, forKey: "bundleVersionAtInstall")
+            learnerPropertyKeys.forEach { key in
+                if let value = learnerStorage.retrieve(forKey: key) as? String {
+                    self.learner?.properties[key] = value
+                }
+            }
         } else {
             print(#function, "error creating a learner")
         }
         
-        learnerPropertyKeys.forEach { key in
-            if let value = learnerStorage.retrieve(forKey: key) as? String {
-                self.learner?.properties[key] = value
-            }
-        }
         saveLocalLearner()
         
     }

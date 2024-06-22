@@ -61,8 +61,8 @@ public class ActivityService: ObservableObject {
     public func syncActivitiesToFS() {
         Task {
             do {
-                let remotelyAddedActivityLogs = try await logActivitiesToRemoteHistory(minActivitiesToLogCount: 0)
-                print("successfully logged activities to remote storage:", remotelyAddedActivityLogs.map{ "\($0.activityId) \($0.value ?? 0)"})
+                let remotelyAddedActivityLogs = try await logActivitiesToRemoteHistory(minActivitiesToLogCount: 1)
+                print("successfully logged activities to remote storage:", remotelyAddedActivityLogs.map{ "\($0.activityId) \($0.value ?? "")"})
             } catch {
                 print(#function, "error logging activities to remote storage: \(error.localizedDescription )")
             }
@@ -74,6 +74,16 @@ public class ActivityService: ObservableObject {
         if let localHistory = localActivityHistory,
            !localHistory.contains(where: {$0.id == activityLog.id}) {
             self.localActivityHistory?.append(activityLog)
+            
+            Task {
+                do {
+                    let remoteActivity = try await self.logSingleActivitiesToRemoteHistory(activityLog)
+                    learnerStorage.store(true, forKey: "\(activityLog.id)")
+                } catch {
+                    print("failed to log a single activity: ", error.localizedDescription)
+                }
+            }
+            
         } else {
             print("Error adding history log: either the history is nil or item has been previously added. Local history:", localActivityHistory ?? "nil")
         }
@@ -101,7 +111,7 @@ public class ActivityService: ObservableObject {
         
         if activitiesToBeLogged.count < minActivitiesToLogCount {
             print("too few new logs, no need to upload yet.")
-            return []
+            throw ServiceError.missingInput
         }
         
         /// add to remote history
@@ -145,6 +155,41 @@ public class ActivityService: ObservableObject {
         }
         
     }
+    
+    public func logSingleActivitiesToRemoteHistory(_ localActivity: ActivityLog) async throws -> ActivityLog {
+            
+        /// add to remote history
+        guard let url = URL(string: analyticsUrl) else {
+            throw ServiceError.failedURLInitialization
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let encoder = JSONEncoder()
+        do {
+            let jsonData = try encoder.encode(localActivity)
+            request.httpBody = jsonData
+        } catch {
+            throw ServiceError.encodingFailed
+        }
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw ServiceError.requestFailed
+        }
+        
+        do {
+            let decoder = JSONDecoder()
+            let remoteActivity = try decoder.decode(ActivityLog.self, from: data)
+            return remoteActivity
+        } catch {
+            throw ServiceError.decodingFailed
+        }
+    }
+
     
     private func saveLocalHistory() {
         

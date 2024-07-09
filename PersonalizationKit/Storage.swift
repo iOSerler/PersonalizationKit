@@ -25,3 +25,10 @@ public protocol LearnerStorage {
     func localizedString(forKey key: String) -> String
         
 }
+
+
+public class StorageDelegate {
+        
+    public static var learnerStorage: LearnerStorage!
+    
+}

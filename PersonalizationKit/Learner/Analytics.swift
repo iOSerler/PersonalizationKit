@@ -9,30 +9,17 @@
 import Foundation
 
 public class Analytics: NSObject {
-    
-    /// set it before using the singleton
-    public static var staticStorage: LearnerStorage! = nil {
-        didSet {
-            shared = Analytics(learnerStorage: staticStorage)
-        }
-    }
 
-    public static var shared = Analytics(learnerStorage: staticStorage)
-    
-    private init(learnerStorage: LearnerStorage) {
-        self.learnerStorage = learnerStorage
-    }
-    
-    private let learnerStorage: LearnerStorage
+    public static var shared = Analytics()
         
     private let launchCountKey = "launch_count"
     private let oldKey = "appOpenedCount"
     
     public var launchCount: Int {
         
-        if let count = learnerStorage.retrieve(forKey: launchCountKey) as? Int {
+        if let count = StorageDelegate.learnerStorage.retrieve(forKey: launchCountKey) as? Int {
             return count
-        } else if let oldCount = learnerStorage.retrieve(forKey: oldKey) as? Int {
+        } else if let oldCount = StorageDelegate.learnerStorage.retrieve(forKey: oldKey) as? Int {
             return oldCount
         } else {
             return 0
@@ -41,7 +28,7 @@ public class Analytics: NSObject {
     
     public func incrementLaunchCount() {
         var incrementedLauchCount = launchCount + 1
-        learnerStorage.store(incrementedLauchCount, forKey: launchCountKey)
+        StorageDelegate.learnerStorage.store(incrementedLauchCount, forKey: launchCountKey)
         logActivity("launch", type: "action", value: String(incrementedLauchCount), startDate: Date())
         setUserProperty(launchCountKey, value: String(launchCount))
     }
@@ -52,7 +39,7 @@ public class Analytics: NSObject {
         print("log:", type, "->", activityId, "->", value ?? "nil", "| startDate:", startDate)
         
         if #available(iOS 13, *) {
-            if let activityLog = ActivityLog(activityId: activityId, type: type, value: value, startDate: startDate, buildVersion: learnerStorage.currentAppVersion) {
+            if let activityLog = ActivityLog(activityId: activityId, type: type, value: value, startDate: startDate, buildVersion: StorageDelegate.learnerStorage.currentAppVersion) {
                 ActivityService.shared.logActivityToHistory(activityLog)
             }
         }

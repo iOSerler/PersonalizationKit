@@ -10,22 +10,8 @@ import Foundation
 
 @available(iOS 13.0, *)
 public class LocalLearner: ObservableObject {
-    
-    /// set it before using the singleton
-    public static var staticStorage: LearnerStorage! = nil {
-        didSet {
-            shared = LocalLearner(learnerStorage: staticStorage)
-        }
-    }
 
-    public static var shared = LocalLearner(learnerStorage: staticStorage)
-    
-    private init(learnerStorage: LearnerStorage) {
-        self.learnerStorage = learnerStorage
-    }
-    
-    private var learnerStorage: LearnerStorage!
-    
+    public static var shared = LocalLearner()    
     
     @Published public var learner: Learner?
 
@@ -41,9 +27,9 @@ public class LocalLearner: ObservableObject {
             }
         } else if let appBuildVersion = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
             self.learner = Learner(id: predefinedAnalyticsId ?? UUID())
-            learnerStorage.store(appBuildVersion, forKey: "bundleVersionAtInstall")
+            StorageDelegate.learnerStorage.store(appBuildVersion, forKey: "bundleVersionAtInstall")
             learnerPropertyKeys.forEach { key in
-                if let value = learnerStorage.retrieve(forKey: key) as? String {
+                if let value = StorageDelegate.learnerStorage.retrieve(forKey: key) as? String {
                     self.learner?.properties[key] = value
                 }
             }
@@ -77,7 +63,7 @@ public class LocalLearner: ObservableObject {
 
         do {
             let data = try encoder.encode(learner)
-            learnerStorage.store(data, forKey: userDefaultsKey)
+            StorageDelegate.learnerStorage.store(data, forKey: userDefaultsKey)
         } catch {
             print("Error encoding learner: \(error)")
         }
@@ -109,7 +95,7 @@ public class LocalLearner: ObservableObject {
     }
     
     private func retrieveLocalLearner() -> Learner? {
-        guard let learnerData = learnerStorage.retrieve(forKey: userDefaultsKey) as? Data else {
+        guard let learnerData = StorageDelegate.learnerStorage.retrieve(forKey: userDefaultsKey) as? Data else {
             return nil
         }
 

@@ -20,21 +20,8 @@ enum ServiceError: Error {
 
 @available(iOS 13.0, *)
 public class ActivityService: ObservableObject {
-    
-    /// set it before using the singleton
-    public static var staticStorage: LearnerStorage! = nil {
-        didSet {
-            shared = ActivityService(learnerStorage: staticStorage)
-        }
-    }
 
-    public static var shared = ActivityService(learnerStorage: staticStorage)
-    
-    private init(learnerStorage: LearnerStorage) {
-        self.learnerStorage = learnerStorage
-    }
-    
-    private let learnerStorage: LearnerStorage
+    public static var shared = ActivityService()
     
     public var localActivityHistory: [ActivityLog]? {
         didSet {
@@ -42,7 +29,7 @@ public class ActivityService: ObservableObject {
         }
     }
 
-    private lazy var analyticsUrl = "\(learnerStorage.serverUrl)/analytics/\(learnerStorage.activtyLogCollectionName)"
+    private lazy var analyticsUrl = "\(StorageDelegate.learnerStorage.serverUrl)/analytics/\(StorageDelegate.learnerStorage.activtyLogCollectionName)"
     private let userDefaultsKey = "engagement_history"
     
     public func kickstartActivityService() {
@@ -77,8 +64,8 @@ public class ActivityService: ObservableObject {
             
             Task {
                 do {
-                    let remoteActivity = try await self.logSingleActivitiesToRemoteHistory(activityLog)
-                    learnerStorage.store(true, forKey: "\(activityLog.id)")
+                    try await self.logSingleActivitiesToRemoteHistory(activityLog)
+                    StorageDelegate.learnerStorage.store(true, forKey: "\(activityLog.id)")
                 } catch {
                     print("failed to log a single activity: ", error.localizedDescription)
                 }
@@ -95,7 +82,7 @@ public class ActivityService: ObservableObject {
         
         for localLog in localActivityHistory?.sorted(by: {$0.startDate ?? Date() < $1.startDate ?? Date()}) ?? [] {
             
-            if learnerStorage.retrieve(forKey: "\(localLog.id)") as? Bool ?? false {
+            if StorageDelegate.learnerStorage.retrieve(forKey: "\(localLog.id)") as? Bool ?? false {
                 /// skipping item as it was already marked as reported
                 continue
             }
@@ -143,7 +130,7 @@ public class ActivityService: ObservableObject {
             }
             
             for log in activityLogs {
-                learnerStorage.store(true, forKey: "\(log.id)")
+                StorageDelegate.learnerStorage.store(true, forKey: "\(log.id)")
             }
             
 //            print(#function, "activities logged to remote history:", activityLogs)
@@ -156,6 +143,7 @@ public class ActivityService: ObservableObject {
         
     }
     
+    @discardableResult
     public func logSingleActivitiesToRemoteHistory(_ localActivity: ActivityLog) async throws -> ActivityLog {
             
         /// add to remote history
@@ -202,14 +190,14 @@ public class ActivityService: ObservableObject {
 
         do {
             let data = try encoder.encode(localActivitiesHistory)
-            learnerStorage.store(data, forKey: userDefaultsKey)
+            StorageDelegate.learnerStorage.store(data, forKey: userDefaultsKey)
         } catch {
             print(#function, "Error encoding localActivitiesHistory: \(error)")
         }
     }
     
     private func retrieveLocalHistory() -> [ActivityLog]? {
-        guard let localHistoryData = learnerStorage.retrieve(forKey: userDefaultsKey) as? Data else {
+        guard let localHistoryData = StorageDelegate.learnerStorage.retrieve(forKey: userDefaultsKey) as? Data else {
             return nil
         }
 

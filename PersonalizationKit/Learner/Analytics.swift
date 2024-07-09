@@ -52,7 +52,7 @@ public class Analytics: NSObject {
         print("log:", activityId, "| type:", type, "| value:", value ?? 0, "| startDate:", startDate)
         
         if #available(iOS 13, *) {
-            if let activityLog = ActivityLog(activityId: activityId, type: type, value: value, startDate: startDate) {
+            if let activityLog = ActivityLog(activityId: activityId, type: type, value: value, startDate: startDate, bundleVersion: learnerStorage.currentBuildVersion) {
                 ActivityService.shared.logActivityToHistory(activityLog)
             }
         }

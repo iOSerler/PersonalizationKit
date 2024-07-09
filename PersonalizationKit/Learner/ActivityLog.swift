@@ -17,6 +17,7 @@ public struct ActivityLog: Codable, Identifiable {
     public let value: Double?
     let startDateString: String?
     let completionDateString: String?
+    let bundleVersion: String?
     
     var startDate: Date? {
         guard let startDateString = startDateString else {
@@ -40,13 +41,15 @@ public struct ActivityLog: Codable, Identifiable {
         case value
         case startDateString = "start_date"
         case completionDateString = "completion_date"
+        case bundleVersion = "bundle_version"
     }
     
     
     init?(activityId: String,
           type: String,
           value: Double?,
-          startDate: Date) {
+          startDate: Date,
+          bundleVersion: String?) {
             
         let dateFormatter: DateFormatter = {
             let dateFormatter = DateFormatter()
@@ -71,6 +74,7 @@ public struct ActivityLog: Codable, Identifiable {
         self.value = value
         self.startDateString = startDateString
         self.completionDateString = completionDateString
+        self.bundleVersion = bundleVersion
     }
 
 }

@@ -12,6 +12,7 @@ public protocol LearnerStorage {
     var serverUrl: String {get}
     var learnerCollectionName: String {get}
     var activtyLogCollectionName: String {get}
+    var currentBuildVersion: String? {get}
     
     func store(_ anyObject: Any, forKey key: String)
     

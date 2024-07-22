@@ -114,7 +114,7 @@ public enum LearnerProperties: String, CaseIterable {
     
     case learnerType = "learner_type"
     
-    case fcmToken = "fcm_token"
+    case apnsToken = "apnsToken"
     
     case launchCount = "launch_count"// "appOpenedCount"
     case bundleVersionAtInstall = "bundleVersionAtInstall" /// eventually replace with "bundle_version_at_install"

@@ -18,6 +18,28 @@ enum ServiceError: Error {
     case decodingFailed
 }
 
+
+extension ServiceError: LocalizedError {
+    var errorDescription: String? {
+        switch self {
+        case .missingInput:
+            return NSLocalizedString("Input data is missing or invalid.", comment: "Missing Input")
+        case .missingToken:
+            return NSLocalizedString("The required token is missing.", comment: "Missing Token")
+        case .failedURLInitialization:
+            return NSLocalizedString("Failed to initialize the URL.", comment: "Failed URL Initialization")
+        case .encodingFailed:
+            return NSLocalizedString("Failed to encode the data.", comment: "Encoding Failed")
+        case .failedResponseInitialization:
+            return NSLocalizedString("Failed to initialize the response.", comment: "Failed Response Initialization")
+        case .requestFailed:
+            return NSLocalizedString("The network request failed.", comment: "Request Failed")
+        case .decodingFailed:
+            return NSLocalizedString("Failed to decode the response data.", comment: "Decoding Failed")
+        }
+    }
+}
+
 @available(iOS 13.0, *)
 public class ActivityService: ObservableObject {
 
@@ -51,7 +73,7 @@ public class ActivityService: ObservableObject {
                 let remotelyAddedActivityLogs = try await logActivitiesToRemoteHistory(minActivitiesToLogCount: 1)
                 print("successfully logged activities to remote storage:", remotelyAddedActivityLogs.map{ "\($0.activityId) \($0.value ?? "")"})
             } catch {
-                print(#function, "error logging activities to remote storage: \(error.localizedDescription )")
+                print(#function, "error logging activities to remote storage: \(error.localizedDescription)")
             }
         }
     }

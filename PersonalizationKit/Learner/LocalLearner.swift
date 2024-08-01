@@ -8,12 +8,12 @@
 
 import Foundation
 
-@available(iOS 13.0, *)
-public class LocalLearner: ObservableObject {
+@available(iOS 10.0, *)
+public class LocalLearner {
 
     public static var shared = LocalLearner()    
     
-    @Published public var learner: Learner?
+    public var learner: Learner?
 
     private let userDefaultsKey = "current_learner"
     private var lastLearnerUpdateAttempt: Date?

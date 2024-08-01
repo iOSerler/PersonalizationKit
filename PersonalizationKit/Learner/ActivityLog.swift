@@ -8,7 +8,7 @@
 
 import Foundation
 
-@available(iOS 13, *)
+@available(iOS 10, *)
 public struct ActivityLog: Codable, Identifiable {
     public let id: UUID
     var learnerId: UUID

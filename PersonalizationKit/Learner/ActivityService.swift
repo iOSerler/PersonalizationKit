@@ -40,8 +40,8 @@ extension ServiceError: LocalizedError {
     }
 }
 
-@available(iOS 13.0, *)
-public class ActivityService: ObservableObject {
+@available(iOS 10.0, *)
+public class ActivityService {
 
     public static var shared = ActivityService()
     
@@ -67,13 +67,14 @@ public class ActivityService: ObservableObject {
         
     }
     
+    @available(iOS 13.0, *)
     public func syncActivitiesToFS() {
         Task {
             do {
                 let remotelyAddedActivityLogs = try await logActivitiesToRemoteHistory(minActivitiesToLogCount: 1)
-                print("successfully logged activities to remote storage:", remotelyAddedActivityLogs.map{ "\($0.activityId) \($0.value ?? "")"})
+//                print("successfully logged activities to remote storage:", remotelyAddedActivityLogs.map{ "\($0.activityId) \($0.value ?? "")"})
             } catch {
-                print(#function, "error logging activities to remote storage: \(error.localizedDescription)")
+                print(#function, "error logging activities to remote storage") // \( error.localizedDescription)")
             }
         }
     }
@@ -84,12 +85,14 @@ public class ActivityService: ObservableObject {
            !localHistory.contains(where: {$0.id == activityLog.id}) {
             self.localActivityHistory?.append(activityLog)
             
-            Task {
-                do {
-                    try await self.logSingleActivitiesToRemoteHistory(activityLog)
-                    StorageDelegate.learnerStorage.store(true, forKey: "\(activityLog.id)")
-                } catch {
-                    print("failed to log a single activity: ", error.localizedDescription)
+            if #available(iOS 13.0, *) {
+                Task {
+                    do {
+                        try await self.logSingleActivitiesToRemoteHistory(activityLog)
+                        StorageDelegate.learnerStorage.store(true, forKey: "\(activityLog.id)")
+                    } catch {
+                        print("failed to log a single activity: ", error.localizedDescription)
+                    }
                 }
             }
             
@@ -98,6 +101,7 @@ public class ActivityService: ObservableObject {
         }
     }
     
+    @available(iOS 13.0.0, *)
     public func logActivitiesToRemoteHistory(minActivitiesToLogCount: Int = 100) async throws -> [ActivityLog] {
         
         var activitiesToBeLogged: [ActivityLog] = []
@@ -143,7 +147,7 @@ public class ActivityService: ObservableObject {
             let (data, response) = try await URLSession.shared.data(for: request)
             guard let httpResponse = response as? HTTPURLResponse,
                   (200...299).contains(httpResponse.statusCode) else {
-                print(#function, "Failed with response: \( (response as? HTTPURLResponse)?.statusCode ?? 0 )", String(data: data, encoding: .utf8) ?? "")
+                print(#function, "Failed with response: \( (response as? HTTPURLResponse)?.statusCode ?? 0 )") //, String(data: data, encoding: .utf8) ?? "")
                 throw ServiceError.requestFailed
             }
             guard let activityLogs = try? JSONDecoder().decode([ActivityLog].self, from: data) else {
@@ -155,16 +159,16 @@ public class ActivityService: ObservableObject {
                 StorageDelegate.learnerStorage.store(true, forKey: "\(log.id)")
             }
             
-//            print(#function, "activities logged to remote history:", activityLogs)
+            print(#function, "activities logged to remote history") //:", activityLogs)
             return activityLogs
         } catch {
             // Handle other errors
-            print(#function, "error: \(error.localizedDescription)")
             throw error
         }
         
     }
     
+    @available(iOS 13.0.0, *)
     @discardableResult
     public func logSingleActivitiesToRemoteHistory(_ localActivity: ActivityLog) async throws -> ActivityLog {
             
@@ -233,9 +237,9 @@ public class ActivityService: ObservableObject {
         }
     }
     
-    public func getActivity(activityId: String, type: String) -> ActivityLog? {
+    public func getActivity(activityId: String, type: String?, value: String?) -> ActivityLog? {
         if let localActivityHistory = localActivityHistory,
-           let activityLog = localActivityHistory.first(where: {$0.activityId == activityId && $0.type == type}) {
+           let activityLog = localActivityHistory.first(where: {$0.activityId == activityId && (type==nil ? true : $0.type == type!) && (value==nil ? true : $0.value == value!)}) {
             return activityLog
         }
         

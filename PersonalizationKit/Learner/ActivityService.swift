@@ -68,7 +68,7 @@ public class ActivityService {
     }
     
     @available(iOS 13.0, *)
-    public func syncActivitiesToFS() {
+    public func bulkUploadActivitiesToRemote() {
         Task {
             do {
                 let remotelyAddedActivityLogs = try await logActivitiesToRemoteHistory(minActivitiesToLogCount: 1)

@@ -11,7 +11,7 @@ import Foundation
 @available(iOS 10.0, *)
 public class LocalLearner {
 
-    public static var shared = LocalLearner()    
+    public static var shared = LocalLearner()
     
     public var learner: Learner?
 
@@ -19,7 +19,7 @@ public class LocalLearner {
     private var lastLearnerUpdateAttempt: Date?
     
     public func kickstartLocalLearner(predefinedAnalyticsId: UUID? = nil, learnerPropertyKeys: [String]) {
-                
+        
         if let localLearner = retrieveLocalLearner() {
             self.learner = localLearner
             if let predefinedAnalyticsId {
@@ -38,31 +38,27 @@ public class LocalLearner {
         }
         
         saveLocalLearner()
-        
     }
     
-    public func getProperty(_ key: String) -> String? {
-        self.learner?.properties[key]
+    public func getProperty(_ key: String) -> Any? {
+        return self.learner?.properties[key]
     }
     
-    public func setProperty(_ value: String, forKey key: String) {
+    public func setProperty(_ value: Any, forKey key: String) {
         self.learner?.properties[key] = value
         saveLocalLearner()
     }
     
     /// save local => update remote
-    
     private func saveLocalLearner() {
         
         guard let learner = self.learner else {
-            // the current learner is nil
+            // The current learner is nil
             return
         }
         
-        let encoder = JSONEncoder()
-
         do {
-            let data = try encoder.encode(learner)
+            let data = try encodeLearner(learner)
             StorageDelegate.learnerStorage.store(data, forKey: userDefaultsKey)
         } catch {
             print("Error encoding learner: \(error)")
@@ -72,12 +68,10 @@ public class LocalLearner {
             return
         }
         
-        // FIXME: how much time is 60, i.e. seconds or minutes?
         if let lastTime = lastLearnerUpdateAttempt,
            Date().timeIntervalSince(lastTime) < 60 {
             return
         }
-        
         
         if LearnerService.shared.remoteLearner != nil {
             lastLearnerUpdateAttempt = Date()
@@ -89,9 +83,6 @@ public class LocalLearner {
                 }
             }
         }
-        
-        
-        
     }
     
     private func retrieveLocalLearner() -> Learner? {
@@ -99,14 +90,47 @@ public class LocalLearner {
             return nil
         }
 
-        let decoder = JSONDecoder()
-
         do {
-            let learner = try decoder.decode(Learner.self, from: learnerData)
+            let learner = try decodeLearner(from: learnerData)
             return learner
         } catch {
             print("Error decoding learner: \(error)")
             return nil
         }
+    }
+    
+    // Custom encoding for `Learner`
+    private func encodeLearner(_ learner: Learner) throws -> Data {
+        let encoder = JSONEncoder()
+        
+        // Convert `properties` to JSON
+        var learnerDict = learner.properties.mapValues { value -> Any in
+            if let value = value as? [String: Any] {
+                return value
+            } else if let value = value as? [Any] {
+                return value
+            } else {
+                return value
+            }
+        }
+
+        let jsonData = try JSONSerialization.data(withJSONObject: learnerDict, options: [])
+        learnerDict["properties"] = jsonData
+        
+        return try encoder.encode(learner)
+    }
+
+    // Custom decoding for `Learner`
+    private func decodeLearner(from data: Data) throws -> Learner {
+        let decoder = JSONDecoder()
+        var learner = try decoder.decode(Learner.self, from: data)
+
+        if let propertiesData = learner.properties["properties"] as? Data {
+            if let decodedProperties = try? JSONSerialization.jsonObject(with: propertiesData, options: []) as? [String: Any] {
+                learner.properties = decodedProperties
+            }
+        }
+
+        return learner
     }
 }

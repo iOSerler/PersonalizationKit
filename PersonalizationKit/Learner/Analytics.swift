@@ -27,7 +27,7 @@ public class Analytics: NSObject {
     }
     
     public func incrementLaunchCount() {
-        var incrementedLauchCount = launchCount + 1
+        let incrementedLauchCount = launchCount + 1
         StorageDelegate.learnerStorage.store(incrementedLauchCount, forKey: launchCountKey)
         logActivity("launch", type: "action", value: String(incrementedLauchCount), startDate: Date())
         setUserProperty(launchCountKey, value: String(launchCount))

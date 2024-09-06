@@ -63,8 +63,9 @@ public class ActivityService {
         }
         
         self.localActivityHistory = localHistory
+        #if DEBUG
         print("localActivityHistory:", localHistory.count)
-        
+        #endif
     }
     
     @available(iOS 13.0, *)
@@ -74,7 +75,7 @@ public class ActivityService {
                 let remotelyAddedActivityLogs = try await logActivitiesToRemoteHistory(minActivitiesToLogCount: 1)
 //                print("successfully logged activities to remote storage:", remotelyAddedActivityLogs.map{ "\($0.activityId) \($0.value ?? "")"})
             } catch {
-                print(#function, "error logging activities to remote storage") // \( error.localizedDescription)")
+                print(#function, "error logging activities to remote storage:", error.localizedDescription)
             }
         }
     }
@@ -123,7 +124,7 @@ public class ActivityService {
         
         
         if activitiesToBeLogged.count < minActivitiesToLogCount {
-            print("too few new logs, no need to upload yet.")
+            /// too few new logs, no need to upload yet.
             throw ServiceError.missingInput
         }
         
@@ -140,7 +141,7 @@ public class ActivityService {
             let requestBody = try JSONEncoder().encode(activitiesToBeLogged)
             request.httpBody = requestBody
         } catch {
-            print("Failed to encode the activityLog: \(error)")
+            print("Failed to encode the activityLog: \(error.localizedDescription)")
         }
         
         do {

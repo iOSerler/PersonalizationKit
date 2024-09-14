@@ -73,7 +73,7 @@ public class ActivityService {
         Task {
             do {
                 let remotelyAddedActivityLogs = try await logActivitiesToRemoteHistory(minActivitiesToLogCount: 1)
-//                print("successfully logged activities to remote storage:", remotelyAddedActivityLogs.map{ "\($0.activityId) \($0.value ?? "")"})
+                print("successfully logged activities to remote storage:", remotelyAddedActivityLogs.count)
             } catch {
                 print(#function, "error logging activities to remote storage:", error.localizedDescription)
             }

@@ -140,8 +140,18 @@ public class ActivityService {
         do {
             let requestBody = try JSONEncoder().encode(activitiesToBeLogged)
             request.httpBody = requestBody
+            
+            // For debugging: print the JSON payload
+            if let jsonString = String(data: requestBody, encoding: .utf8) {
+                #if DEBUG
+                print("Request JSON Payload:", jsonString)
+                #endif
+                
+            }
         } catch {
-            print("Failed to encode the activityLog: \(error.localizedDescription)")
+            #if DEBUG
+            print("Failed to encode the activityLog:", error.localizedDescription)
+            #endif
         }
         
         do {

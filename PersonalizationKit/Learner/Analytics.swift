@@ -39,10 +39,8 @@ public class Analytics: NSObject {
         print("log:", type, "->", activityId, "->", value ?? "nil", "| startDate:", startDate)
         #endif
         
-        if #available(iOS 13, *) {
-            if let activityLog = ActivityLog(activityId: activityId, type: type, value: value, startDate: startDate, buildVersion: StorageDelegate.learnerStorage.currentAppVersion) {
-                ActivityService.shared.logActivityToHistory(activityLog)
-            }
+        if let activityLog = ActivityLog(activityId: activityId, type: type, value: value, startDate: startDate, buildVersion: StorageDelegate.learnerStorage.currentAppVersion) {
+            ActivityService.shared.logActivityToHistory(activityLog)
         }
     }
     
@@ -51,11 +49,7 @@ public class Analytics: NSObject {
         print("setUserProperty:", property, "| value:", "\(value)")
         #endif
         
-        if #available(iOS 13.0, *) {
-            LocalLearner.shared.setProperty("\(value)", forKey: property)
-        }
-        
-        
+        LocalLearner.shared.setProperty("\(value)", forKey: property)
     }
     
 }

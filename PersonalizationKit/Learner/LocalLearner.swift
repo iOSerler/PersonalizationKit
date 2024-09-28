@@ -44,7 +44,7 @@ public class LocalLearner {
         return self.learner?.properties[key]
     }
     
-    public func setProperty(_ value: Any, forKey key: String) {
+    public func setProperty(_ value: String, forKey key: String) {
         self.learner?.properties[key] = value
         saveLocalLearner()
     }
@@ -58,7 +58,7 @@ public class LocalLearner {
         }
         
         do {
-            let data = try encodeLearner(learner)
+            let data = try JSONEncoder().encode(learner)
             StorageDelegate.learnerStorage.store(data, forKey: userDefaultsKey)
         } catch {
             print("Error encoding learner: \(error)")
@@ -91,7 +91,7 @@ public class LocalLearner {
         }
 
         do {
-            let learner = try decodeLearner(from: learnerData)
+            let learner = try JSONDecoder().decode(Learner.self, from: learnerData)
             return learner
         } catch {
             print("Error decoding learner: \(error)")
@@ -99,38 +99,4 @@ public class LocalLearner {
         }
     }
     
-    // Custom encoding for `Learner`
-    private func encodeLearner(_ learner: Learner) throws -> Data {
-        let encoder = JSONEncoder()
-        
-        // Convert `properties` to JSON
-        var learnerDict = learner.properties.mapValues { value -> Any in
-            if let value = value as? [String: Any] {
-                return value
-            } else if let value = value as? [Any] {
-                return value
-            } else {
-                return value
-            }
-        }
-
-        let jsonData = try JSONSerialization.data(withJSONObject: learnerDict, options: [])
-        learnerDict["properties"] = jsonData
-        
-        return try encoder.encode(learner)
-    }
-
-    // Custom decoding for `Learner`
-    private func decodeLearner(from data: Data) throws -> Learner {
-        let decoder = JSONDecoder()
-        var learner = try decoder.decode(Learner.self, from: data)
-
-        if let propertiesData = learner.properties["properties"] as? Data {
-            if let decodedProperties = try? JSONSerialization.jsonObject(with: propertiesData, options: []) as? [String: Any] {
-                learner.properties = decodedProperties
-            }
-        }
-
-        return learner
-    }
 }

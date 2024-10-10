@@ -36,7 +36,7 @@ public class Analytics: NSObject {
     
     public func logActivity(_ activityId: String, type: String, value: String?, startDate: Date) {
         #if DEBUG
-        print("log:", type, "->", activityId, "->", value ?? "nil", "| startDate:", startDate)
+        print("log:", type, "->", activityId, "->", value?.prefix(30) ?? "nil", "| startDate:", startDate)
         #endif
         
         if #available(iOS 13, *) {

@@ -169,6 +169,65 @@ public class ActivityService {
         
     }
     
+    
+    @available(iOS 13.0.0, *)
+    public func getAssessmentResults() async throws -> Assessment {
+        
+        var activitiesToBeLogged: [ActivityLog] = []
+        
+        for localLog in localActivityHistory?.sorted(by: {$0.startDate ?? Date() < $1.startDate ?? Date()}) ?? [] {
+            
+            if localLog.type != "shape" && localLog.type != "sound"  {
+                /// skipping item as it was already marked as reported
+                continue
+            }
+            
+            activitiesToBeLogged.append(localLog)
+        }
+        
+        
+        if activitiesToBeLogged.count < 1 {
+            /// too few new logs, no need to upload yet.
+            throw ServiceError.missingInput
+        }
+        
+        /// add to remote history
+        guard let url = URL(string: analyticsUrl+"/assessment") else {
+            throw ServiceError.failedURLInitialization
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        do {
+            let requestBody = try JSONEncoder().encode(activitiesToBeLogged)
+            request.httpBody = requestBody
+        } catch {
+            print("Failed to encode the activityLog: \(error.localizedDescription)")
+        }
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse,
+                  (200...299).contains(httpResponse.statusCode) else {
+                print(#function, "Failed with response: \( (response as? HTTPURLResponse)?.statusCode ?? 0 )") //, String(data: data, encoding: .utf8) ?? "")
+                throw ServiceError.requestFailed
+            }
+            
+            guard let assessment = try? JSONDecoder().decode(Assessment.self, from: data) else {
+                print(#function, "Failed to decode", String(data: data, encoding: .utf8) ?? "")
+                throw ServiceError.decodingFailed
+            }
+            
+            return assessment
+        } catch {
+            // Handle other errors
+            throw error
+        }
+        
+    }
+    
     @available(iOS 13.0.0, *)
     @discardableResult
     public func logSingleActivitiesToRemoteHistory(_ localActivity: ActivityLog) async throws -> ActivityLog {

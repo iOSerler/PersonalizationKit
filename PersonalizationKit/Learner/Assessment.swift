@@ -27,7 +27,7 @@ public struct Assessment: Codable {
     
     public var selectLettersForRevision: [String] {
         // Filter out letters with 0 exercises count
-        let filteredLetters = letterMastery.filter { $0.soundExercises > 0 || $0.shapeExercises > 0 }
+        let filteredLetters = letterMastery.filter { $0.soundExercises > 0 || $0.shapeExercises > 0 }.shuffled()
         
         // Sort by lowest mastery scores (consider both sound and shape)
         let sortedLetters = filteredLetters.sorted { (a, b) -> Bool in

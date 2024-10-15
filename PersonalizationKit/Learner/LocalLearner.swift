@@ -11,10 +11,10 @@ import Foundation
 @available(iOS 10.0, *)
 public class LocalLearner {
 
-    public static var shared = LocalLearner()
-    
-    public var learner: Learner?
+    public static let shared = LocalLearner()
 
+    public var learner: Learner?
+    
     private let userDefaultsKey = "current_learner"
     private var lastLearnerUpdateAttempt: Date?
     
@@ -45,6 +45,14 @@ public class LocalLearner {
     }
     
     public func setProperty(_ value: String, forKey key: String) {
+        guard !key.isEmpty else {
+            print("Attempted to set a property with an empty key.")
+            return
+        }
+        guard !value.isEmpty else {
+            print("Attempted to set a property with an empty value.")
+            return
+        }
         self.learner?.properties[key] = value
         saveLocalLearner()
     }
@@ -58,10 +66,13 @@ public class LocalLearner {
         }
         
         do {
-            let data = try JSONEncoder().encode(learner)
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = .prettyPrinted
+            let data = try encoder.encode(learner)
             StorageDelegate.learnerStorage.store(data, forKey: userDefaultsKey)
         } catch {
             print("Error encoding learner: \(error)")
+            return
         }
         
         guard #available(iOS 15.0, *) else {
@@ -91,7 +102,11 @@ public class LocalLearner {
         }
 
         do {
-            let learner = try JSONDecoder().decode(Learner.self, from: learnerData)
+            var learner = try JSONDecoder().decode(Learner.self, from: learnerData)
+            // Clean the properties after decoding
+            learner.properties = learner.properties.filter { key, value in
+                return !(key.isEmpty || value.isEmpty)
+            }
             return learner
         } catch {
             print("Error decoding learner: \(error)")

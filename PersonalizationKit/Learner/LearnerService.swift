@@ -143,8 +143,6 @@ public class LearnerService {
             print(#function, "Error learner update failed: local learner is nil")
             throw ServiceError.missingInput
         }
-    
-//        print(#function, "learner update initated: \(learner)")
         
         guard let url = URL(string: "\(learnerUrl)") else {
             throw ServiceError.failedURLInitialization
@@ -156,7 +154,7 @@ public class LearnerService {
         
         do {
             let encoder = JSONEncoder()
-            encoder.dateEncodingStrategy = .iso8601
+            encoder.outputFormatting = .prettyPrinted
             let requestBody = try encoder.encode(learner)
             request.httpBody = requestBody
         } catch {

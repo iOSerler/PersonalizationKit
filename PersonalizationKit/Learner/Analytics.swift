@@ -49,7 +49,7 @@ public class Analytics: NSObject {
         print("setUserProperty:", property, "| value:", "\(value)")
         #endif
         
-        LocalLearner.shared.setProperty("\(value)", forKey: property)
+        LearnerService.shared.setLearnerProperty("\(value)", forKey: property)
     }
     
 }

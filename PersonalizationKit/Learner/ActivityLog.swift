@@ -60,7 +60,7 @@ public struct ActivityLog: Codable, Identifiable {
         }()
 
         
-        guard let learnerId = LocalLearner.shared.learner?.id else {
+        guard let learnerId = LearnerService.shared.learnerId else {
             print(#function, "error: no learner id")
             return nil
         }

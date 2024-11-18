@@ -306,4 +306,10 @@ public class ActivityService {
         return nil
     }
     
+    public func getAllActivities(activityId: String, type: String?, value: String?) -> [ActivityLog] {
+        guard let localActivityHistory = localActivityHistory else { return [] }
+        
+        return localActivityHistory.filter({$0.activityId == activityId && (type==nil ? true : $0.type == type!) && (value==nil ? true : $0.value == value!)})
+    }
+    
 }

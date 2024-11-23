@@ -248,12 +248,60 @@ public class ActivityService {
         }
     }
     
-    public func getActivity(activityId: String, type: String?, value: String?) -> ActivityLog? {
+    public func getActivity(activityId: String, type: String? = nil, value: String? = nil) -> ActivityLog? {
         if let localActivityHistory = localActivityHistory,
-           let activityLog = localActivityHistory.first(where: {$0.activityId == activityId && (type==nil ? true : $0.type == type!) && (value==nil ? true : $0.value == value!)}) {
+           let activityLog = localActivityHistory.last(where: {$0.activityId == activityId && (type==nil ? true : $0.type == type!) && (value==nil ? true : $0.value == value!)}) {
             return activityLog
         }
         
+        return nil
+    }
+    
+    public enum ValueLogic {
+        case max
+        case min
+        case first
+        case last
+    }
+    
+    public func getActivityValue(activityId: String, type: String? = nil, logic: ValueLogic = .last) -> String? {
+        guard let localActivityHistory = localActivityHistory else {
+            return nil
+        }
+
+        // Filter activity logs
+        let activityLogs = localActivityHistory.filter {
+            $0.activityId == activityId && (type == nil || $0.type == type)
+        }
+
+        if !activityLogs.isEmpty {
+            // Safely handle logic
+            switch logic {
+            case .first:
+                return activityLogs.first?.value
+            case .last:
+                return activityLogs.last?.value
+            case .max:
+                return activityLogs.max { (Decimal(string: $0.value ?? "") ?? 0) < Decimal(string: $1.value ?? "") ?? 0 }?.value
+            case .min:
+                return activityLogs.min { (Decimal(string: $0.value ?? "") ?? 0) < Decimal(string: $1.value ?? "") ?? 0 }?.value
+            }
+        }
+
+        // Retrieve progress from StorageDelegate
+        let progressKeys = [
+            activityId,
+            "lesson_nurios_\(activityId)"
+        ]
+        
+        for key in progressKeys {
+            if let progress = StorageDelegate.learnerStorage.retrieve(forKey: key) as? String {
+                return progress
+            } else if let progress = StorageDelegate.learnerStorage.retrieve(forKey: key) as? Double {
+                return String(progress)
+            }
+        }
+
         return nil
     }
     

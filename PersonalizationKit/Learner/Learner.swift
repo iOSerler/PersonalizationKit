@@ -11,44 +11,48 @@ import Foundation
 public class Learner: Codable {
     public var id: UUID
     private var properties: [String: String]
+    
+    /// Optional dictionary for property-level server override flags
+    public var serverOverrides: [String: Bool]?
 
     enum CodingKeys: String, CodingKey {
         case id
         case properties
+        case serverOverrides
     }
 
-    init(id: UUID, properties: [String: String] = [:]) {
+    init(id: UUID, properties: [String: String] = [:], serverOverrides: [String: Bool]? = nil) {
         self.id = id
         self.properties = properties
+        self.serverOverrides = serverOverrides
     }
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(id, forKey: .id)
-        // Clean the properties before encoding
-        var cleanProperties = properties
         
-        cleanProperties = cleanProperties.filter { key, value in
-            return !(key.isEmpty || value.isEmpty)
-        }
-        
+        // Filter out empty keys/values
+        let cleanProperties = properties.filter { !$0.key.isEmpty && !$0.value.isEmpty }
         try container.encode(cleanProperties, forKey: .properties)
+        
+        try container.encodeIfPresent(serverOverrides, forKey: .serverOverrides)
     }
 
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.id = try container.decode(UUID.self, forKey: .id)
-        // Attempt to decode properties, default to empty dictionary if it fails
+        
         if let decodedProperties = try? container.decode([String: String].self, forKey: .properties) {
-            // Clean the properties after decoding
-            self.properties = decodedProperties.filter { key, value in
-                return !(key.isEmpty || value.isEmpty)
-            }
+            self.properties = decodedProperties.filter { !$0.key.isEmpty && !$0.value.isEmpty }
         } else {
             self.properties = [:]
         }
+
+        // If serverOverrides isn't provided by older versions, it just remains nil
+        self.serverOverrides = try? container.decodeIfPresent([String: Bool].self, forKey: .serverOverrides)
     }
     
+    // Access properties
     public func getProperty(_ key: String) -> String? {
         return self.properties[key]
     }
@@ -57,15 +61,9 @@ public class Learner: Codable {
         return self.properties
     }
     
+    // Local setter
     fileprivate func setProperty(_ value: String, forKey key: String) {
-        guard !key.isEmpty else {
-            print("Attempted to set a property with an empty key.")
-            return
-        }
-        guard !value.isEmpty else {
-            print("Attempted to set a property with an empty value.")
-            return
-        }
+        guard !key.isEmpty, !value.isEmpty else { return }
         self.properties[key] = value
     }
 }
@@ -164,40 +162,39 @@ public class LearnerService {
     
     @available(iOS 13.0, *)
     public func kickstartRemoteLearner() {
-        
         guard let localLearner = self.localLearner else {
-            print(#function, "error getting local learner")
+            print(#function, "error: no local learner")
             return
         }
-        
+
         Task {
             do {
-                self.remoteLearner = try await self.getRemoteLearner(localLearner.id.uuidString.lowercased())
-                print("successfully got remote learner")
-            } catch(let getLearnerError) {
-                print(#function, "error getting remote learner", getLearnerError.localizedDescription)
+                let fetchedRemote = try await self.getRemoteLearner(localLearner.id.uuidString.lowercased())
+                print("Fetched remote learner:", fetchedRemote)
+                
+                // Merge remote -> local, respecting override flags
+                let merged = mergeLearners(local: localLearner, remote: fetchedRemote)
+                self.localLearner = merged
+                saveLocalLearner()  // persist the merged result
+                NotificationCenter.default.post(Notification(name: Notification.Name("UpdateUI")))
+
+                // If desired, update the server with the merged version
+                // (so the server also picks up local changes on non-overridden properties)
+                if merged != fetchedRemote {
+                    print("Updating remote \(merged.id), lowercase: \(merged.id.uuidString.lowercased()) with merged data.")
+                    let updatedRemote = try await updateRemoteLearner()
+                    self.remoteLearner = updatedRemote
+                } else {
+                    self.remoteLearner = fetchedRemote
+                }
+            } catch {
+                // If remote doesn't exist or some error, maybe create new remote or handle error
                 do {
                     self.remoteLearner = try await self.createRemoteLearner()
-                    print("successfully created remote learner")
-                } catch(let createLearnerError) {
-                    print(#function, "error creating remote learner", createLearnerError.localizedDescription)
-                    return
+                } catch {
+                    print(#function, "error creating remote learner:", error.localizedDescription)
                 }
             }
-            
-            guard let remoteLearner = remoteLearner else {
-                print(#function, "failed to assign remote learner")
-                return
-            }
-            
-            do {
-                if localLearner != remoteLearner {
-                    self.remoteLearner = try await updateRemoteLearner()
-                }
-            } catch(let updateLearnerError) {
-                print(#function, "error updating remote learner", updateLearnerError.localizedDescription)
-            }
-            
         }
     }
         
@@ -296,6 +293,37 @@ public class LearnerService {
             print(#function, "error getting the remote learner: \(error.localizedDescription)")
             throw error
         }
+    }
+    
+    /// Merge remote learner into local, respecting serverOverrides
+    func mergeLearners(local: Learner, remote: Learner) -> Learner {
+        // Start with a copy of local
+        let mergedLearner = Learner(
+            id: local.id,
+            properties: local.getAllProperties(),
+            serverOverrides: remote.serverOverrides // or keep local's if that makes sense
+        )
+        
+        // For each remote property
+        for (key, remoteValue) in remote.getAllProperties() {
+            
+            let shouldOverride = remote.serverOverrides?[key] == true
+            
+            if shouldOverride {
+                // Server override => forcibly use remote property
+                mergedLearner.setProperty(remoteValue, forKey: key)
+            } else {
+                // If local doesn't have the property or it's empty, adopt the remote property
+                // (Alternatively, we could skip adopting remote if we strictly want "local wins" on non-overridden keys)
+                if mergedLearner.getProperty(key) == nil {
+                    mergedLearner.setProperty(remoteValue, forKey: key)
+                }
+                // If local has a value, we do nothing—local remains
+            }
+        }
+        
+        // If remote has no override and local has a property, local property is kept.
+        return mergedLearner
     }
 
     @available(iOS 13.0.0, *)

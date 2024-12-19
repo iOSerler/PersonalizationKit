@@ -181,7 +181,7 @@ public class LearnerService {
                 // If desired, update the server with the merged version
                 // (so the server also picks up local changes on non-overridden properties)
                 if merged != fetchedRemote {
-                    print("Updating remote \(merged.id), lowercase: \(merged.id.uuidString.lowercased()) with merged data.")
+//                    print("Updating remote \(merged.id), lowercase: \(merged.id.uuidString.lowercased()) with merged data.")
                     let updatedRemote = try await updateRemoteLearner()
                     self.remoteLearner = updatedRemote
                 } else {

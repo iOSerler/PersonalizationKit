@@ -248,15 +248,6 @@ public class ActivityService {
         }
     }
     
-    public func getActivity(activityId: String, type: String? = nil, value: String? = nil) -> ActivityLog? {
-        if let localActivityHistory = localActivityHistory,
-           let activityLog = localActivityHistory.last(where: {$0.activityId == activityId && (type==nil ? true : $0.type == type!) && (value==nil ? true : $0.value == value!)}) {
-            return activityLog
-        }
-        
-        return nil
-    }
-    
     public enum ValueLogic {
         case max
         case min
@@ -264,7 +255,7 @@ public class ActivityService {
         case last
     }
     
-    public func getActivityValue(activityId: String, type: String? = nil, logic: ValueLogic = .last) -> String? {
+    public func getActivity(activityId: String, type: String? = nil, logic: ValueLogic = .last) -> ActivityLog? {
         guard let localActivityHistory = localActivityHistory else {
             return nil
         }
@@ -278,27 +269,13 @@ public class ActivityService {
             // Safely handle logic
             switch logic {
             case .first:
-                return activityLogs.first?.value
+                return activityLogs.first
             case .last:
-                return activityLogs.last?.value
+                return activityLogs.last
             case .max:
-                return activityLogs.max { (Decimal(string: $0.value ?? "") ?? 0) < Decimal(string: $1.value ?? "") ?? 0 }?.value
+                return activityLogs.max { (Decimal(string: $0.value ?? "") ?? 0) < Decimal(string: $1.value ?? "") ?? 0 }
             case .min:
-                return activityLogs.min { (Decimal(string: $0.value ?? "") ?? 0) < Decimal(string: $1.value ?? "") ?? 0 }?.value
-            }
-        }
-
-        // Retrieve progress from StorageDelegate
-        let progressKeys = [
-            activityId,
-            "lesson_nurios_\(activityId)"
-        ]
-        
-        for key in progressKeys {
-            if let progress = StorageDelegate.learnerStorage.retrieve(forKey: key) as? String {
-                return progress
-            } else if let progress = StorageDelegate.learnerStorage.retrieve(forKey: key) as? Double {
-                return String(progress)
+                return activityLogs.min { (Decimal(string: $0.value ?? "") ?? 0) < Decimal(string: $1.value ?? "") ?? 0 }
             }
         }
 

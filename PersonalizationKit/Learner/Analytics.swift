@@ -34,12 +34,12 @@ public class Analytics: NSObject {
     }
     
     
-    public func logActivity(_ activityId: String, type: String, value: String?, startDate: Date) {
+    public func logActivity(_ activityId: String, type: String, value: String?, startDate: Date, completionDate: Date = Date()) {
         #if DEBUG
         print("log:", type, "->", activityId, "->", value ?? "nil", "| startDate:", startDate)
         #endif
         
-        if let activityLog = ActivityLog(activityId: activityId, type: type, value: value, startDate: startDate, buildVersion: StorageDelegate.learnerStorage.currentAppVersion) {
+        if let activityLog = ActivityLog(activityId: activityId, type: type, value: value, startDate: startDate, completionDate: completionDate, buildVersion: StorageDelegate.learnerStorage.currentAppVersion) {
             ActivityService.shared.logActivityToHistory(activityLog)
         }
     }

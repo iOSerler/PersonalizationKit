@@ -51,6 +51,7 @@ public struct ActivityLog: Codable, Identifiable {
           type: String,
           value: String?,
           startDate: Date,
+          completionDate: Date = Date(),
           buildVersion: String?) {
             
         let dateFormatter: DateFormatter = {
@@ -67,7 +68,7 @@ public struct ActivityLog: Codable, Identifiable {
         
         let id = UUID()
         let startDateString = dateFormatter.string(from: startDate)
-        let completionDateString = dateFormatter.string(from: Date())
+        let completionDateString = dateFormatter.string(from: completionDate)
         
         self.id = id
         self.learnerId = learnerId

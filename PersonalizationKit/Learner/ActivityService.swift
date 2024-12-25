@@ -282,4 +282,11 @@ public class ActivityService {
         return nil
     }
     
+    public func getActivities(of types: [String]) -> [ActivityLog]? {
+        guard let localActivityHistory = localActivityHistory else {
+            return nil
+        }
+        
+        return localActivityHistory.filter({ types.contains($0.type) })
+    }
 }

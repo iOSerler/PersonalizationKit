@@ -29,20 +29,18 @@ public class Analytics: NSObject {
     public func incrementLaunchCount() {
         let incrementedLauchCount = launchCount + 1
         StorageDelegate.learnerStorage.store(incrementedLauchCount, forKey: launchCountKey)
-        logActivity("launch", type: "action", value: String(incrementedLauchCount), startDate: Date())
+        logActivity("launch", type: "app", value: String(incrementedLauchCount), startDate: Date())
         setUserProperty(launchCountKey, value: String(launchCount))
     }
     
     
-    public func logActivity(_ activityId: String, type: String, value: String?, startDate: Date) {
+    public func logActivity(_ activityId: String, type: String, value: String?, startDate: Date, completionDate: Date = Date()) {
         #if DEBUG
         print("log:", type, "->", activityId, "->", value?.prefix(30) ?? "nil", "| startDate:", startDate)
         #endif
         
-        if #available(iOS 13, *) {
-            if let activityLog = ActivityLog(activityId: activityId, type: type, value: value, startDate: startDate, buildVersion: StorageDelegate.learnerStorage.currentAppVersion) {
-                ActivityService.shared.logActivityToHistory(activityLog)
-            }
+        if let activityLog = ActivityLog(activityId: activityId, type: type, value: value, startDate: startDate, completionDate: completionDate, buildVersion: StorageDelegate.learnerStorage.currentAppVersion) {
+            ActivityService.shared.logActivityToHistory(activityLog)
         }
     }
     
@@ -51,11 +49,7 @@ public class Analytics: NSObject {
         print("setUserProperty:", property, "| value:", "\(value)")
         #endif
         
-        if #available(iOS 13.0, *) {
-            LocalLearner.shared.setProperty("\(value)", forKey: property)
-        }
-        
-        
+        LearnerService.shared.setLearnerProperty("\(value)", forKey: property)
     }
     
 }

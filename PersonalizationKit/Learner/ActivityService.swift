@@ -73,7 +73,7 @@ public class ActivityService {
         Task {
             do {
                 let remotelyAddedActivityLogs = try await logActivitiesToRemoteHistory(minActivitiesToLogCount: 1)
-//                print("successfully logged activities to remote storage:", remotelyAddedActivityLogs.map{ "\($0.activityId) \($0.value ?? "")"})
+                print("successfully logged activities to remote storage:", remotelyAddedActivityLogs.count)
             } catch {
                 print(#function, "error logging activities to remote storage:", error.localizedDescription)
             }
@@ -140,8 +140,18 @@ public class ActivityService {
         do {
             let requestBody = try JSONEncoder().encode(activitiesToBeLogged)
             request.httpBody = requestBody
+            
+            // For debugging: print the JSON payload
+            if let jsonString = String(data: requestBody, encoding: .utf8) {
+                #if DEBUG
+                print("Request JSON Payload:", jsonString)
+                #endif
+                
+            }
         } catch {
-            print("Failed to encode the activityLog: \(error.localizedDescription)")
+            #if DEBUG
+            print("Failed to encode the activityLog:", error.localizedDescription)
+            #endif
         }
         
         do {
@@ -297,19 +307,46 @@ public class ActivityService {
         }
     }
     
-    public func getActivity(activityId: String, type: String?, value: String?) -> ActivityLog? {
-        if let localActivityHistory = localActivityHistory,
-           let activityLog = localActivityHistory.first(where: {$0.activityId == activityId && (type==nil ? true : $0.type == type!) && (value==nil ? true : $0.value == value!)}) {
-            return activityLog
+    public enum ValueLogic {
+        case max
+        case min
+        case first
+        case last
+    }
+    
+    public func getActivity(activityId: String, type: String? = nil, logic: ValueLogic = .last) -> ActivityLog? {
+        guard let localActivityHistory = localActivityHistory else {
+            return nil
         }
-        
+
+        // Filter activity logs
+        let activityLogs = localActivityHistory.filter {
+            $0.activityId == activityId && (type == nil || $0.type == type)
+        }
+
+        if !activityLogs.isEmpty {
+            // Safely handle logic
+            switch logic {
+            case .first:
+                return activityLogs.first
+            case .last:
+                return activityLogs.last
+            case .max:
+                return activityLogs.max { (Decimal(string: $0.value ?? "") ?? 0) < Decimal(string: $1.value ?? "") ?? 0 }
+            case .min:
+                return activityLogs.min { (Decimal(string: $0.value ?? "") ?? 0) < Decimal(string: $1.value ?? "") ?? 0 }
+            }
+        }
+
         return nil
     }
     
-    public func getAllActivities(activityId: String, type: String?, value: String?) -> [ActivityLog] {
-        guard let localActivityHistory = localActivityHistory else { return [] }
+    public func getActivities(of types: [String]) -> [ActivityLog]? {
+        guard let localActivityHistory = localActivityHistory else {
+            return nil
+        }
         
-        return localActivityHistory.filter({$0.activityId == activityId && (type==nil ? true : $0.type == type!) && (value==nil ? true : $0.value == value!)})
+        return localActivityHistory.filter({ types.contains($0.type) })
     }
-    
+
 }

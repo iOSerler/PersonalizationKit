@@ -51,6 +51,7 @@ public struct ActivityLog: Codable, Identifiable {
           type: String,
           value: String?,
           startDate: Date,
+          completionDate: Date = Date(),
           buildVersion: String?) {
             
         let dateFormatter: DateFormatter = {
@@ -60,14 +61,14 @@ public struct ActivityLog: Codable, Identifiable {
         }()
 
         
-        guard let learnerId = LocalLearner.shared.learner?.id else {
+        guard let learnerId = LearnerService.shared.learnerId else {
             print(#function, "error: no learner id")
             return nil
         }
         
         let id = UUID()
         let startDateString = dateFormatter.string(from: startDate)
-        let completionDateString = dateFormatter.string(from: Date())
+        let completionDateString = dateFormatter.string(from: completionDate)
         
         self.id = id
         self.learnerId = learnerId

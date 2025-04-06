@@ -314,14 +314,14 @@ public class ActivityService {
         case last
     }
     
-    public func getActivity(activityId: String, type: String? = nil, logic: ValueLogic = .last) -> ActivityLog? {
+    public func getActivity(activityId: String, type: String? = nil, value: String? = nil, logic: ValueLogic = .last) -> ActivityLog? {
         guard let localActivityHistory = localActivityHistory else {
             return nil
         }
 
         // Filter activity logs
         let activityLogs = localActivityHistory.filter {
-            $0.activityId == activityId && (type == nil || $0.type == type)
+            $0.activityId == activityId && (type == nil || $0.type == type) && (value == nil || $0.value == value)
         }
 
         if !activityLogs.isEmpty {
@@ -347,6 +347,26 @@ public class ActivityService {
         }
         
         return localActivityHistory.filter({ types.contains($0.type) })
+    }
+    
+    public func getAllInstances(_ activityId: String? = nil, type: String? = nil, value: String? = nil) -> [ActivityLog] {
+        guard var localActivityHistory = localActivityHistory else {
+            return []
+        }
+        
+        if let activityId = activityId {
+            localActivityHistory = localActivityHistory.filter({ $0.activityId == activityId })
+        }
+        
+        if let type = type {
+            localActivityHistory = localActivityHistory.filter({ $0.type == type })
+        }
+        
+        if let value = value {
+            localActivityHistory = localActivityHistory.filter({ $0.value == value })
+        }
+        
+        return localActivityHistory
     }
 
 }

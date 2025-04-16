@@ -73,7 +73,7 @@ class LocalStorage: NSObject, LearnerStorage {
     }
     
     func localizedString(forKey key: String) -> String {
-        key.localized()
+        key.localized
     }
     
 }

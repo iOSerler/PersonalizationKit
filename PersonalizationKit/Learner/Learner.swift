@@ -10,8 +10,16 @@ import Foundation
 
 public class Learner: Codable {
     public var id: UUID
-    private var properties: [String: String]
-    
+
+    /// `properties` is read by `JSONEncoder.encode` on background tasks
+    /// (LearnerService.updateRemoteLearner) while user-driven code keeps
+    /// calling `setProperty` on the main thread. Swift dictionaries are
+    /// not thread-safe — every read and write goes through `lockQueue`
+    /// so the encoder can take an atomic snapshot and never see the
+    /// dictionary mid-mutation.
+    private var _properties: [String: String]
+    private let lockQueue = DispatchQueue(label: "namaz.personalizationkit.learner.properties")
+
     /// Optional dictionary for property-level server override flags
     public var serverOverrides: [String: Bool]?
 
@@ -23,54 +31,56 @@ public class Learner: Codable {
 
     init(id: UUID, properties: [String: String] = [:], serverOverrides: [String: Bool]? = nil) {
         self.id = id
-        self.properties = properties
+        self._properties = properties
         self.serverOverrides = serverOverrides
     }
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(id, forKey: .id)
-        
-        // Filter out empty keys/values
-        let cleanProperties = properties.filter { !$0.key.isEmpty && !$0.value.isEmpty }
+
+        let snapshot = lockQueue.sync { _properties }
+        let cleanProperties = snapshot.filter { !$0.key.isEmpty && !$0.value.isEmpty }
         try container.encode(cleanProperties, forKey: .properties)
-        
+
         try container.encodeIfPresent(serverOverrides, forKey: .serverOverrides)
     }
 
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.id = try container.decode(UUID.self, forKey: .id)
-        
+
         if let decodedProperties = try? container.decode([String: String].self, forKey: .properties) {
-            self.properties = decodedProperties.filter { !$0.key.isEmpty && !$0.value.isEmpty }
+            self._properties = decodedProperties.filter { !$0.key.isEmpty && !$0.value.isEmpty }
         } else {
-            self.properties = [:]
+            self._properties = [:]
         }
 
         // If serverOverrides isn't provided by older versions, it just remains nil
         self.serverOverrides = try? container.decodeIfPresent([String: Bool].self, forKey: .serverOverrides)
     }
-    
+
     // Access properties
     public func getProperty(_ key: String) -> String? {
-        return self.properties[key]
+        lockQueue.sync { _properties[key] }
     }
-    
+
     public func getAllProperties() -> [String: String] {
-        return self.properties
+        lockQueue.sync { _properties }
     }
-    
+
     // Local setter
     fileprivate func setProperty(_ value: String, forKey key: String) {
         guard !key.isEmpty, !value.isEmpty else { return }
-        self.properties[key] = value
+        lockQueue.sync { _properties[key] = value }
     }
 }
 
 extension Learner: Equatable {
     public static func == (lhs: Learner, rhs: Learner) -> Bool {
-        return lhs.id == rhs.id && NSDictionary(dictionary: lhs.properties).isEqual(to: rhs.properties)
+        let l = lhs.getAllProperties()
+        let r = rhs.getAllProperties()
+        return lhs.id == rhs.id && NSDictionary(dictionary: l).isEqual(to: r)
     }
 }
 

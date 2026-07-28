@@ -22,9 +22,6 @@ public protocol LearnerStorage {
     func remove(forKey key: String)
     
     func getAllItemKeys(withPrefix: String) -> [String]
-    
-    func localizedString(forKey key: String) -> String
-        
 }
 
 

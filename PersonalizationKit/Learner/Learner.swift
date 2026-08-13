@@ -216,6 +216,15 @@ public class LearnerService {
                 self.localLearner = merged
                 saveLocalLearner()  // persist the merged result
 
+                // The merge can change what the app is allowed to show —
+                // a server-set property can arrive that gates UI. The fetch is
+                // async and lands after the first screens have drawn, so
+                // anything reading these properties has to be told to look
+                // again rather than waiting for the next launch.
+                await MainActor.run {
+                    NotificationCenter.default.post(name: .learnerDidMerge, object: nil)
+                }
+
                 // If desired, update the server with the merged version
                 // (so the server also picks up local changes on non-overridden properties)
                 if merged != fetchedRemote {
@@ -419,4 +428,12 @@ public class LearnerService {
     }
     
     
+}
+
+public extension Notification.Name {
+
+    /// Posted after a remote learner has been merged into the local one, on
+    /// the main thread. Observe it to re-read anything driven by learner
+    /// properties the server owns.
+    static let learnerDidMerge = Notification.Name("PersonalizationKit.learnerDidMerge")
 }

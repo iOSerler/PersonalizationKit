@@ -50,14 +50,57 @@ public class Learner: Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.id = try container.decode(UUID.self, forKey: .id)
 
-        if let decodedProperties = try? container.decode([String: String].self, forKey: .properties) {
-            self._properties = decodedProperties.filter { !$0.key.isEmpty && !$0.value.isEmpty }
-        } else {
-            self._properties = [:]
-        }
+        self._properties = Learner.decodeProperties(from: container)
 
         // If serverOverrides isn't provided by older versions, it just remains nil
         self.serverOverrides = try? container.decodeIfPresent([String: Bool].self, forKey: .serverOverrides)
+    }
+
+    /// Key for reading `properties` one entry at a time, whatever the server named them.
+    private struct PropertyKey: CodingKey {
+        let stringValue: String
+        var intValue: Int? { nil }
+        init?(stringValue: String) { self.stringValue = stringValue }
+        init?(intValue: Int) { return nil }
+    }
+
+    /// Decode `properties` per key, so one bad value costs only that key.
+    ///
+    /// This used to decode the whole thing as `[String: String]` and fall back to
+    /// an empty dictionary when that threw. A single `null` value — the server
+    /// stored `bundleVersionAtInstall: null` for a fifth of all learners — made
+    /// the decode throw, the fallback then dropped *every* property, and the
+    /// learner merged nothing. Server-set properties silently stopped arriving,
+    /// premium grants among them, with nothing in the logs to show for it.
+    ///
+    /// Values the server writes are strings, but numbers and booleans are
+    /// coerced rather than dropped: the JSON type a value happens to carry is
+    /// not worth losing the value over.
+    private static func decodeProperties(
+        from container: KeyedDecodingContainer<CodingKeys>
+    ) -> [String: String] {
+        guard let nested = try? container.nestedContainer(keyedBy: PropertyKey.self,
+                                                          forKey: .properties)
+        else { return [:] }
+
+        var properties: [String: String] = [:]
+        for key in nested.allKeys where !key.stringValue.isEmpty {
+            var value: String?
+            if let string = try? nested.decode(String.self, forKey: key) {
+                value = string
+            } else if let int = try? nested.decode(Int.self, forKey: key) {
+                value = String(int)
+            } else if let double = try? nested.decode(Double.self, forKey: key) {
+                value = String(double)
+            } else if let bool = try? nested.decode(Bool.self, forKey: key) {
+                value = bool ? "1" : "0"
+            }
+            // Anything left — null, an object, an array — is skipped, and only it.
+            if let value, !value.isEmpty {
+                properties[key.stringValue] = value
+            }
+        }
+        return properties
     }
 
     // Access properties
